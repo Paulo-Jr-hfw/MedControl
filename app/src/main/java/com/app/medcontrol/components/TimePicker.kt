@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +67,6 @@ fun SelecaoHorarios(
 
         horarios.forEachIndexed { index, horario ->
             HorarioItem(
-                index = index,
                 horario = horario,
                 mostrarBotaoRemover = index > 0,
                 estaSendoEditado = indexEditando == index,
@@ -82,7 +82,6 @@ fun SelecaoHorarios(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun HorarioItem(
-    index: Int,
     horario: LocalTime,
     mostrarBotaoRemover: Boolean,
     estaSendoEditado: Boolean,
@@ -172,6 +171,10 @@ private fun WheelTimePicker(
     val state = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
     val snapFlingBehavior = rememberSnapFlingBehavior(lazyListState = state)
 
+    val currentIndex by remember {
+        derivedStateOf { state.firstVisibleItemIndex }
+    }
+
     Box(
         modifier = Modifier
             .width(50.dp)
@@ -196,7 +199,7 @@ private fun WheelTimePicker(
 
             itemsIndexed(items) { index, item ->
 
-                val isSelected = state.firstVisibleItemIndex == index
+                val isSelected = currentIndex == index
 
                 Box(
                     modifier = Modifier.fillMaxWidth().height(itemHeight),
