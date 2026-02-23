@@ -22,7 +22,7 @@ fun MenuButton(
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier.height(80.dp), // Altura fixa para ficarem iguais
+        modifier = modifier.height(80.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
