@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.medcontrol.R
+import com.app.medcontrol.components.MedicamentoItem
 import com.app.medcontrol.components.MenuButton
 import com.app.medcontrol.components.ProgressBarDinamica
 import com.app.medcontrol.model.Medicamento
@@ -38,7 +39,7 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(medicamentos: List<Medicamento>) {
+fun PacienteScreen(medicamentos: List<Medicamento>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -133,7 +134,9 @@ fun LazyListScope.secaoListaMedicamentos(medicamentos: List<Medicamento>) {
     }
 
     items(medicamentos) { medicamento ->
-        MedicamentoItem(medicamento = medicamento)
+        MedicamentoItem(
+            medicamento = medicamento,
+            onCheckClick = { println("Medicamento ${medicamento.nome} tomado!") })
     }
 }
 
@@ -149,5 +152,5 @@ fun HomeScreenPreview() {
     Medicamento(2, "Amoxicilina", "875mg", "1 comprimido",null, listOf(LocalTime.of(12,0))),
     Medicamento(3, "Vitamina C", "1g", "1 efervescente",null, listOf(LocalTime.of(9,0)))
     )
-    HomeScreen(medicamentos = listaFake)
+    PacienteScreen(medicamentos = listaFake)
 }
