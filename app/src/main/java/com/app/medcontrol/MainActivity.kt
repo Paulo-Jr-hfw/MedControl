@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
 import com.app.medcontrol.screen.cadastromed.CadastroMedScreen
 import com.app.medcontrol.ui.theme.MedControlTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
