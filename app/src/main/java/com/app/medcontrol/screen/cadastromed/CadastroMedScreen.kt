@@ -31,21 +31,38 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.app.medcontrol.components.SelecaoHorarios
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CadastroMedScreen(
-    viewModel: CadastroMedScreenViewModel =viewModel()
+    viewModel: CadastroMedScreenViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         viewModel.onImagemUriChange(uri)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is CadastroMedScreenViewModel.UiEvent.CadastroSucesso -> {
+                    android.widget.Toast.makeText(
+                        context,
+                        "Medicamento salvo com sucesso!",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     val scrollState = rememberScrollState()
