@@ -7,11 +7,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.app.medcontrol.model.Medicamento
+import androidx.lifecycle.viewModelScope
+import com.app.medcontrol.data.MedicamentoDao
+import com.app.medcontrol.data.MedicamentoEntity
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.time.LocalTime
+import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
-class CadastroMedScreenViewModel: ViewModel() {
+@HiltViewModel
+class CadastroMedScreenViewModel @Inject constructor(
+    private val medicamentoDao: MedicamentoDao
+): ViewModel() {
+
+    private val _uiEvent = Channel<UiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+    sealed class UiEvent {
+        object CadastroSucesso : UiEvent()
+    }
+
     var nome by mutableStateOf("")
     var dosagem by mutableStateOf("")
     var instrucoes by mutableStateOf("")
@@ -69,15 +86,23 @@ class CadastroMedScreenViewModel: ViewModel() {
         dosagemErro = dosagem.isBlank()
         if (nomeErro || dosagemErro) return
 
-        val novoMedicamento = Medicamento(
-            id = 0,
+        val entity = MedicamentoEntity(
             nome = nome,
             dosagem = dosagem,
             instrucoes = instrucoes,
-            imagemUri = imagemUri.toString(),
+            imagemUri = imagemUri?.toString(),
             horario = listaHorarios
         )
-        println( "Medicamento salvo: $novoMedicamento")
+        viewModelScope.launch {
+            try {
+                medicamentoDao.saveMedicamento(entity)
+                _uiEvent.send(UiEvent.CadastroSucesso)
+
+                // DICA: Aqui você pode limpar os campos ou avisar a View para fechar a tela
+            } catch (e: Exception) {
+                println("Erro ao salvar: ${e.message}")
+            }
+        }
     }
 }
 
