@@ -6,10 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [MedicamentoEntity::class], version = 1, exportSchema = false)
+@Database(entities = [MedicamentoEntity::class, UsuarioEntity::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun medicamentoDao(): MedicamentoDao
+    abstract fun usuarioDao(): UsuarioDao
 
     companion object {
         @Volatile

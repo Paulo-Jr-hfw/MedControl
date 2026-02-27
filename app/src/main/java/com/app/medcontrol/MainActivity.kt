@@ -5,10 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxSize
-import com.app.medcontrol.screen.cadastromed.CadastroMedScreen
+import com.app.medcontrol.screen.LoginScreen
 import com.app.medcontrol.ui.theme.MedControlTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    CadastroMedScreen()
+                    LoginScreen()
                 }
             }
         }

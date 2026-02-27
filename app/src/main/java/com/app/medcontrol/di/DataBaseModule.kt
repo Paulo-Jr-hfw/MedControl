@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.app.medcontrol.data.AppDataBase
 import com.app.medcontrol.data.MedicamentoDao
+import com.app.medcontrol.data.UsuarioDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,5 +30,11 @@ object DataBaseModule {
     fun provideMedicamentoDao(dataBase: AppDataBase) : MedicamentoDao{
         return dataBase.medicamentoDao()
 
+    }
+
+    @Provides
+    @Singleton
+    fun provideUsuarioDao(dataBase: AppDataBase) : UsuarioDao {
+        return dataBase.usuarioDao()
     }
 }

@@ -98,7 +98,7 @@ class CadastroMedScreenViewModel @Inject constructor(
                 medicamentoDao.saveMedicamento(entity)
                 _uiEvent.send(UiEvent.CadastroSucesso)
 
-                // DICA: Aqui você pode limpar os campos ou avisar a View para fechar a tela
+                // Colocar Aqui codigo para limpar os campos ou avisar a View para fechar a telaA
             } catch (e: Exception) {
                 println("Erro ao salvar: ${e.message}")
             }

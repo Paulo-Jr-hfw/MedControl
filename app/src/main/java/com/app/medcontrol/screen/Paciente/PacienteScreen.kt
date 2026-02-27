@@ -1,4 +1,4 @@
-package com.app.medcontrol.screen
+package com.app.medcontrol.screen.Paciente
 
 import android.os.Build
 import androidx.annotation.RequiresApi
