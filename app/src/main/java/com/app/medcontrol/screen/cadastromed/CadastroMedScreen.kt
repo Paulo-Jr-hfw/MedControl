@@ -94,12 +94,12 @@ fun CadastroMedScreen(
             })
         Spacer(modifier = Modifier.height(16.dp))
 
-        FormCadastro(
-            nome = viewModel.nome,
+        FormCadastroMed(
+            nome = viewModel.nomeMed,
             onNomeChange = { novoNome ->
-                viewModel.onNomeChange(novoNome)
+                viewModel.onNomeMedChange(novoNome)
             },
-            nomeErro = viewModel.nomeErro,
+            nomeErro = viewModel.nomeMedErro,
 
             dosagem = viewModel.dosagem,
             onDosagemChange = { novaDosagem ->
@@ -148,7 +148,7 @@ fun FotoCadastro(
 }
 
 @Composable
-fun FormCadastro(
+fun FormCadastroMed(
     nome: String,
     onNomeChange: (String) -> Unit,
     nomeErro: Boolean,

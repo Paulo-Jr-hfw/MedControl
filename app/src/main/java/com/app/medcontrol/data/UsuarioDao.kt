@@ -1,6 +1,7 @@
 package com.app.medcontrol.data
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 
 @Dao
@@ -16,4 +17,6 @@ interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE email = :email")
     suspend fun getUsuarioByEmail(email: String): UsuarioEntity
 
+    @Insert
+    suspend fun saveUsuario(usuario: UsuarioEntity)
 }

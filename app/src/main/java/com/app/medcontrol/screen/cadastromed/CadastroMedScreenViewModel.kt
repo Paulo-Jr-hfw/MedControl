@@ -29,7 +29,7 @@ class CadastroMedScreenViewModel @Inject constructor(
         object CadastroSucesso : UiEvent()
     }
 
-    var nome by mutableStateOf("")
+    var nomeMed by mutableStateOf("")
     var dosagem by mutableStateOf("")
     var instrucoes by mutableStateOf("")
     var imagemUri by mutableStateOf<Uri?>(null)
@@ -40,13 +40,13 @@ class CadastroMedScreenViewModel @Inject constructor(
     var indexHorarioEditando by mutableStateOf<Int?>(null)
         private set
 
-    var nomeErro by mutableStateOf(false)
+    var nomeMedErro by mutableStateOf(false)
     var dosagemErro by mutableStateOf(false)
 
 
-    fun onNomeChange(novoNome: String) {
-        nome = novoNome
-        if (novoNome.isNotBlank()) nomeErro = false
+    fun onNomeMedChange(novoNome: String) {
+        nomeMed = novoNome
+        if (novoNome.isNotBlank()) nomeMedErro = false
     }
     fun onDosagemChange(novaDosagem: String) {
         dosagem = novaDosagem
@@ -82,12 +82,12 @@ class CadastroMedScreenViewModel @Inject constructor(
     }
 
     fun onSalvaMedicamento(){
-        nomeErro = nome.isBlank()
+        nomeMedErro = nomeMed.isBlank()
         dosagemErro = dosagem.isBlank()
-        if (nomeErro || dosagemErro) return
+        if (nomeMedErro || dosagemErro) return
 
         val entity = MedicamentoEntity(
-            nome = nome,
+            nome = nomeMed,
             dosagem = dosagem,
             instrucoes = instrucoes,
             imagemUri = imagemUri?.toString(),

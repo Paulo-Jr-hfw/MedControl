@@ -6,6 +6,17 @@ O foco deste projeto é aplicar as melhores práticas de desenvolvimento Android
 
 ---
 
+## ✨ Funcionalidades Implementadas (MVP Core)
+
+- [x] **Fluxo de Autenticação:** Telas de Login e Cadastro com distinção entre perfis (Paciente/Acompanhante).
+- [x] **Arquitetura Reativa:** Implementação de ViewModels com estados observáveis e tratamento de erros em tempo real.
+- [x] **Animações Premium:** Transições de perfil fluidas usando `updateTransition` e `BiasAlignment`.
+- [x] **Persistência Local:** Banco de dados Room configurado com suporte a tipos complexos (LocalTime) via TypeConverters.
+- [x] **Validação Inteligente:** Validação de formato de e-mail (Patterns) e verificação de duplicidade no banco de dados.
+- [x] **Injeção de Dependência:** Configuração completa com Dagger Hilt para desacoplamento de código.
+
+---
+
 ## 🚀 Funcionalidades Planejadas
 
 - [ ] **Gestão de Medicamentos:** Cadastro completo com nome, dosagem, instruções e fotos.
@@ -23,26 +34,12 @@ O foco deste projeto é aplicar as melhores práticas de desenvolvimento Android
 - **Linguagem:** [Kotlin](https://kotlinlang.org/)
 - **Interface UI:** [Jetpack Compose](https://developer.android.com/jetpack/compose) (Declarative UI)
 - **Arquitetura:** MVVM (Model-View-ViewModel)
+- **Injeção de Dependências:** [Dagger Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
 - **Persistência de Dados:** [Room Database](https://developer.android.com/training/data-storage/room)
+- **Animações:** Compose Animation (UpdateTransition, AnimatedContent)
 - **Carregamento de Imagens:** [Coil](https://coil-kt.github.io/coil/)
 - **Trabalho em Segundo Plano:** [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager)
-- **Injeção de Dependências:** (A definir: Hilt ou Koin)
 - **Backend/Sync:** (A definir: Firebase)
-
----
-
-## 🚧 Status do Projeto
-
-O projeto está sendo construído em etapas incrementais:
-
-- **Fase 1: Fundação e UI Core** (Em andamento)
-  - Estruturação da arquitetura MVVM e interface base com Jetpack Compose.
-- **Fase 2: Persistência e Agendamento** (Pendente)
-  - Integração com Banco de Dados Room e sistema de alarmes locais.
-- **Fase 3: Sincronização e Modo Acompanhante** (Pendente)
-  - Implementação de backend/Firebase para compartilhamento de dados em tempo real.
-- **Fase 4: Saúde e Wearables** (Pendente)
-  - Integração com Health Connect e monitoramento de sinais vitais.
 
 ---
 
