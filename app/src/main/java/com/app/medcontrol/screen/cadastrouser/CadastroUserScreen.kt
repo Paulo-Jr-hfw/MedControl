@@ -1,5 +1,6 @@
 package com.app.medcontrol.screen.cadastrouser
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,10 +43,13 @@ fun CadastroUserScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     LaunchedEffect(uiState.sucesso) {
         if (uiState.sucesso) {
+            Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
             onNavigateBack()
+            viewModel.resetSucesso()
         }
     }
 
@@ -162,7 +167,7 @@ fun CadastroUserForm(
             isError = emailErro,
             supportingText = {
                 if (emailErro) {
-                    Text(text = "Email inválido", color = MaterialTheme.colorScheme.error)
+                    Text(text = emailMensagemErro, color = MaterialTheme.colorScheme.error)
                 }
             }
         )

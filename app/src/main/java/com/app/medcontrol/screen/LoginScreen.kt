@@ -21,12 +21,15 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,10 +50,19 @@ import com.app.medcontrol.screen.login.LoginScreenViewModel
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginScreenViewModel = hiltViewModel()
+    viewModel: LoginScreenViewModel = hiltViewModel(),
+    onNavigateToCadastro: () -> Unit,
+    onNavigateHome: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    var tipoSelecionado by remember { mutableStateOf(TipoUsuario.PACIENTE) }
 
-        var tipoSelecionado by remember { mutableStateOf(TipoUsuario.PACIENTE) }
+    LaunchedEffect(uiState.sucesso){
+        if (uiState.sucesso) {
+            onNavigateHome()
+            viewModel.resetSucessoLogin()
+        }
+    }
 
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             HeaderIncial(tipo = tipoSelecionado)
@@ -66,12 +78,15 @@ fun LoginScreen(
 
             UserLogin(
                 tipo = tipoSelecionado,
-                email = viewModel.email,
-                senha = viewModel.password,
-                onLogin = viewModel::onLogin,
+                email = uiState.email,
+                senha = uiState.senha,
+                onLogin = {viewModel.onLogin(tipoSelecionado)},
                 onEmailChange = viewModel::onEmailChange,
                 onSenhaChange = viewModel::onPasswordChange,
-                loginError = viewModel.loginError
+                loginError = uiState.loginError,
+                mensagemErro = uiState.mensagemErro,
+                onNavigateToCadastroUser = onNavigateToCadastro,
+                isLoading = uiState.isLoading
             )
 
     }
@@ -96,9 +111,12 @@ fun UserLogin(tipo: TipoUsuario,
               email: String,
               senha: String,
               loginError: Boolean,
+              isLoading: Boolean,
               onLogin: () -> Unit,
-              onEmailChange: (String) -> Unit ,
-              onSenhaChange: (String) -> Unit) {
+              onEmailChange: (String) -> Unit,
+              onSenhaChange: (String) -> Unit,
+              mensagemErro: String,
+              onNavigateToCadastroUser: () -> Unit) {
 
     val primaryColor = if (tipo == TipoUsuario.PACIENTE) Color(0xFF4CAF50) else Color(0xFF673AB7)
 
@@ -153,7 +171,7 @@ fun UserLogin(tipo: TipoUsuario,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             supportingText = {
-                if(loginError) Text(text = "E-mail ou senha incorretos", color = Color.Red)
+                if(loginError) Text(text = mensagemErro, color = Color.Red)
             }
         )
 
@@ -180,20 +198,22 @@ fun UserLogin(tipo: TipoUsuario,
 
         Button(
             onClick = onLogin,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            enabled = !isLoading,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = animatedButtonColor),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(
-                text = if (tipo == TipoUsuario.PACIENTE)
-                    "ENTRAR COMO PACIENTE" else "ENTRAR COMO ACOMPANHANTE",
-                fontWeight = FontWeight.Bold
-            )
+            if (isLoading) {
+                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+            } else {
+                Text(
+                    text = if (tipo == TipoUsuario.PACIENTE) "ENTRAR COMO PACIENTE" else "ENTRAR COMO ACOMPANHANTE",
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
-        TextButton(onClick = { /* Ir para Cadastro */ }) {
+        TextButton(onClick = { onNavigateToCadastroUser() }) {
             Text("Não possui cadastro? Crie sua conta aqui", color = Color.Gray)
         }
     }

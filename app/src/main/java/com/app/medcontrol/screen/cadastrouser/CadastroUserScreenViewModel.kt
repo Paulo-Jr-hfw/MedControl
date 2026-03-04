@@ -109,8 +109,8 @@ class CadastroUserScreenViewModel@Inject constructor(
         }
     }
 
-    fun onSucesso() {
-        //navegar para tela de login
+    fun resetSucesso() {
+        _uiState.update { it.copy(sucesso = false) }
     }
 
     private fun validarCampos(): Boolean {

@@ -39,7 +39,7 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PacienteScreen(medicamentos: List<Medicamento>) {
+fun HomeScreen(medicamentos: List<Medicamento>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -152,5 +152,5 @@ fun HomeScreenPreview() {
     Medicamento(2, "Amoxicilina", "875mg", "1 comprimido",null, listOf(LocalTime.of(12,0))),
     Medicamento(3, "Vitamina C", "1g", "1 efervescente",null, listOf(LocalTime.of(9,0)))
     )
-    PacienteScreen(medicamentos = listaFake)
+    HomeScreen(medicamentos = listaFake)
 }
