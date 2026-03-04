@@ -22,7 +22,9 @@ object DataBaseModule {
             context,
             AppDataBase::class.java,
             "med_control_db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
