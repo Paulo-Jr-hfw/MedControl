@@ -1,24 +1,21 @@
 package com.app.medcontrol.data
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.time.LocalTime
 
 class Converters {
-    private val gson = Gson()
-
-
     @TypeConverter
     fun fromLocalTimeList(value: List<LocalTime>?): String? {
-        return gson.toJson(value)
+        return value?.joinToString(",") { it.toString() }
     }
 
-
+    @RequiresApi(Build.VERSION_CODES.O)
     @TypeConverter
     fun toLocalTimeList(value: String?): List<LocalTime>? {
-        if (value == null) return emptyList()
-        val listType = object : TypeToken<List<LocalTime>>() {}.type
-        return gson.fromJson(value, listType)
+
+        if (value.isNullOrBlank()) return emptyList()
+        return value.split(",").map { LocalTime.parse(it) }
     }
 }
