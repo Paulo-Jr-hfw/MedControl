@@ -1,16 +1,19 @@
 package com.app.medcontrol.screen.cadastrouser
 
 import android.widget.Toast
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -26,10 +29,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,6 +61,7 @@ fun CadastroUserScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize().imePadding(),
         bottomBar = {
             Button(
                 onClick = { viewModel.onSalvarUsuario() },
@@ -71,9 +79,15 @@ fun CadastroUserScreen(
             }
         }
     ) { paddingValues ->
+        val focusManager = LocalFocusManager.current
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp)
                 .verticalScroll(scrollState)
@@ -112,7 +126,7 @@ fun HeaderUser() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground), // Substitua pela sua Logo
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = null,
             modifier = Modifier.size(80.dp),
             tint = MaterialTheme.colorScheme.primary
@@ -143,6 +157,8 @@ fun CadastroUserForm(
     senhaErro: Boolean,
     emailMensagemErro: String = "E-mail inválido"
 ) {
+    val focusManager = LocalFocusManager.current
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedTextField(
             value = nomeUser,
@@ -151,6 +167,10 @@ fun CadastroUserForm(
             },
             label = { Text("Insira seu Primeiro nome") },
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) } ),
             isError = nomeUserErro,
             supportingText = {
                 if (nomeUserErro) {
@@ -163,7 +183,10 @@ fun CadastroUserForm(
             onValueChange = onEmailChange,
             label = { Text("E-mail") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) } ),
             isError = emailErro,
             supportingText = {
                 if (emailErro) {
@@ -177,6 +200,10 @@ fun CadastroUserForm(
             label = { Text("Senha") },
             isError = senhaErro,
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.clearFocus() } ),
             supportingText = {
                 if (senhaErro) {
                     Text(text = "Senha inválida", color = MaterialTheme.colorScheme.error)
