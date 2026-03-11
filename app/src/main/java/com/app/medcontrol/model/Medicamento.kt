@@ -3,7 +3,7 @@ package com.app.medcontrol.model
 import java.time.LocalTime
 
 data class Medicamento(
-    val id: Int,
+    val medicamentoId: Int,
     val nome: String,
     val dosagem: String,
     val instrucoes: String,

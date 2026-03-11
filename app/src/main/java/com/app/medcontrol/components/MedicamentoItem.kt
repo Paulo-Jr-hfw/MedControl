@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,24 +21,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.app.medcontrol.R
 import com.app.medcontrol.model.Medicamento
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MedicamentoItem(
     medicamento: Medicamento,
     onCheckClick: (() -> Unit)? = null
 ) {
+    val horariosFormatados = medicamento.horario.joinToString(separator = " • ") {
+        it.format(DateTimeFormatter.ofPattern("HH:mm"))
+    }
     Card(
-        modifier = Modifier.Companion.padding(8.dp)
+        modifier = Modifier.padding(8.dp)
     ) {
-        Row(verticalAlignment = Alignment.Companion.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Card(
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .size(100.dp)
                     .padding(8.dp),
                 shape = RoundedCornerShape(12.dp)
@@ -46,19 +53,24 @@ fun MedicamentoItem(
                     model = medicamento.imagemUri,
                     contentDescription = null,
                     placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                    contentScale = ContentScale.Companion.Crop,
-                    modifier = Modifier.Companion.fillMaxSize()
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             Column(
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .padding(16.dp)
                     .weight(1f)
             ) {
                 Text(text = medicamento.nome)
                 Text(text = medicamento.dosagem)
                 Text(text = medicamento.instrucoes)
-                Text(text = medicamento.horario.toString())
+                Text(
+                    text = horariosFormatados,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
             }
             onCheckClick?.let { acao ->
                 IconButton(onClick = acao) {
@@ -78,7 +90,7 @@ fun MedicamentoItem(
 @Composable
 fun MedicamentoItemPreview() {
     val medicamentoTeste = Medicamento(
-        id = 1,
+        medicamentoId = 1,
         nome = "Dipirona",
         dosagem = "500mg",
         instrucoes = "Tomar após as refeições",

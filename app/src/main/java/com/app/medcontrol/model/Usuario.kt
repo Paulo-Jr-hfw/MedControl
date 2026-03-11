@@ -1,7 +1,7 @@
 package com.app.medcontrol.model
 
 data class Usuario(
-    val id: Int,
+    val usuarioId: Int,
     val nome: String,
     val email: String,
     val senha: String,

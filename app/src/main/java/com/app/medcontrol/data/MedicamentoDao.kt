@@ -25,6 +25,10 @@ interface MedicamentoDao {
     @Query("DELETE FROM medicamentos WHERE id = :id")
     suspend fun deleteById(id: Int)
 
+    @Query( "SELECT * FROM medicamentos WHERE usuarioId = :usuarioId")
+    fun getMedicamentosByUsuarioId(usuarioId: Int): Flow<List<MedicamentoEntity>>
+
+
     @Delete
     suspend fun deleteMedicamento(medicamento: MedicamentoEntity)
 
