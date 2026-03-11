@@ -3,104 +3,137 @@ package com.app.medcontrol.screen.cadastromed
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.medcontrol.data.MedicamentoDao
 import com.app.medcontrol.data.MedicamentoEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
+data class CadastroMedUiState(
+    val nomeMed: String = "",
+    val dosagem: String = "",
+    val instrucoes: String = "",
+    val imagemUri: Uri? = null,
+    val listaHorarios: List<LocalTime> = listOf(LocalTime.of(8, 0)),
+    val nomeMedErro: Boolean = false,
+    val dosagemErro: Boolean = false,
+    val isLoading: Boolean = false,
+    val indexHorarioEditando: Int? = null
+)
+
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class CadastroMedScreenViewModel @Inject constructor(
-    private val medicamentoDao: MedicamentoDao
-): ViewModel() {
+    private val medicamentoDao: MedicamentoDao,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
+    private val usuarioId: Int = checkNotNull(savedStateHandle["usuarioId"])
+    private val _uiState = MutableStateFlow(CadastroMedUiState())
+    val uiState: StateFlow<CadastroMedUiState> = _uiState.asStateFlow()
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
+
     sealed class UiEvent {
         object CadastroSucesso : UiEvent()
+        data class ShowError(val message: String) : UiEvent()
     }
-
-    var nomeMed by mutableStateOf("")
-    var dosagem by mutableStateOf("")
-    var instrucoes by mutableStateOf("")
-    var imagemUri by mutableStateOf<Uri?>(null)
-
-    var listaHorarios by mutableStateOf(listOf(LocalTime.of(8,0)))
-        private set
-
-    var indexHorarioEditando by mutableStateOf<Int?>(null)
-        private set
-
-    var nomeMedErro by mutableStateOf(false)
-    var dosagemErro by mutableStateOf(false)
 
 
     fun onNomeMedChange(novoNome: String) {
-        nomeMed = novoNome
-        if (novoNome.isNotBlank()) nomeMedErro = false
+        _uiState.update { it.copy(nomeMed = novoNome, nomeMedErro = false) }
     }
+
     fun onDosagemChange(novaDosagem: String) {
-        dosagem = novaDosagem
-        if (novaDosagem.isNotBlank()) dosagemErro = false
+        _uiState.update { it.copy(dosagem = novaDosagem, dosagemErro = false) }
     }
+
     fun onInstrucoesChange(novasInstrucoes: String) {
-        instrucoes = novasInstrucoes
+        _uiState.update { it.copy(instrucoes = novasInstrucoes) }
     }
+
     fun onImagemUriChange(novaUri: Uri?) {
-        imagemUri = novaUri
+        _uiState.update { it.copy(imagemUri = novaUri) }
     }
+
+    fun setEditando(index: Int?) {
+        _uiState.update { it.copy(indexHorarioEditando = index) }
+    }
+
     fun onAdicionarHorario() {
-        val ultimoHorario = listaHorarios.lastOrNull() ?: LocalTime.of(8,0)
-        val novoHorario = ultimoHorario.plusHours(1)
-        listaHorarios = listaHorarios + novoHorario
+        _uiState.update { state ->
+            val ultimoHorario = state.listaHorarios.lastOrNull() ?: LocalTime.of(8, 0)
+            val novoHorario = ultimoHorario.plusHours(1)
+            state.copy(listaHorarios = state.listaHorarios + novoHorario)
+        }
     }
 
     fun onAtualizarHorario(index: Int, novoHorario: LocalTime) {
-        listaHorarios = listaHorarios.toMutableList().also {
-            it[index] = novoHorario
+        _uiState.update { state ->
+            val novaLista = state.listaHorarios.toMutableList().apply {
+                this[index] = novoHorario
+            }
+            state.copy(listaHorarios = novaLista)
         }
     }
 
     fun onRemoverHorario(index: Int) {
-        if (listaHorarios.size > 1) {
-            listaHorarios = listaHorarios.toMutableList().also {
-                it.removeAt(index)
+        _uiState.update { state ->
+            if (state.listaHorarios.size > 1) {
+                val novaLista = state.listaHorarios.toMutableList().apply {
+                    this.removeAt(index)
+                }
+                state.copy(listaHorarios = novaLista)
+            } else {
+                state
             }
         }
     }
-    fun setEditando(index: Int?) {
-        indexHorarioEditando = index
-    }
 
-    fun onSalvaMedicamento(){
-        nomeMedErro = nomeMed.isBlank()
-        dosagemErro = dosagem.isBlank()
-        if (nomeMedErro || dosagemErro) return
 
-        val entity = MedicamentoEntity(
-            nome = nomeMed,
-            dosagem = dosagem,
-            instrucoes = instrucoes,
-            imagemUri = imagemUri?.toString(),
-            horario = listaHorarios
-        )
+    fun onSalvaMedicamento() {
+        val currentState = _uiState.value
+
+        val nomeInvalido = currentState.nomeMed.isBlank()
+        val dosagemInvalida = currentState.dosagem.isBlank()
+
+        if (nomeInvalido || dosagemInvalida) {
+            _uiState.update { it.copy(nomeMedErro = nomeInvalido, dosagemErro = dosagemInvalida) }
+            return
+        }
+
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
             try {
-                medicamentoDao.saveMedicamento(entity)
-                _uiEvent.send(UiEvent.CadastroSucesso)
+                val entity = MedicamentoEntity(
+                    usuarioId = usuarioId,
+                    nome = currentState.nomeMed,
+                    dosagem = currentState.dosagem,
+                    instrucoes = currentState.instrucoes,
+                    imagemUri = currentState.imagemUri?.toString(),
+                    horario = currentState.listaHorarios
+                )
 
-                // Colocar Aqui codigo para limpar os campos ou avisar a View para fechar a telaA
+                medicamentoDao.saveMedicamento(entity)
+
+                _uiEvent.send(UiEvent.CadastroSucesso)
+                _uiState.update { CadastroMedUiState() }
+
             } catch (e: Exception) {
-                println("Erro ao salvar: ${e.message}")
+                _uiEvent.send(UiEvent.ShowError("Erro ao salvar: ${e.message}"))
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }

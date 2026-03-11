@@ -2,9 +2,11 @@ package com.app.medcontrol.screen.cadastromed
 
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,10 +14,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
@@ -28,11 +33,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -42,9 +52,13 @@ import com.app.medcontrol.components.SelecaoHorarios
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CadastroMedScreen(
-    viewModel: CadastroMedScreenViewModel = hiltViewModel()
+    viewModel: CadastroMedScreenViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
+
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -55,73 +69,72 @@ fun CadastroMedScreen(
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is CadastroMedScreenViewModel.UiEvent.CadastroSucesso -> {
-                    android.widget.Toast.makeText(
-                        context,
-                        "Medicamento salvo com sucesso!",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(context, "Medicamento salvo!", Toast.LENGTH_SHORT).show()
+                    onNavigateBack()
+                }
+
+                is CadastroMedScreenViewModel.UiEvent.ShowError -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
-    val scrollState = rememberScrollState()
-    val totalHorarios = viewModel.listaHorarios.size
-
-    LaunchedEffect(totalHorarios) {
+    LaunchedEffect(uiState.listaHorarios.size) {
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
-    Scaffold (
+    Scaffold(
+        modifier = Modifier.fillMaxSize().imePadding(),
         bottomBar = {
             BotaoSalvar(
                 onClick = { viewModel.onSalvaMedicamento() },
+                enabled = !uiState.isLoading,
                 modifier = Modifier.padding(16.dp)
             )
         }
-    ) {
-        paddingValues ->
+    ) { paddingValues ->
+        val focusManager = LocalFocusManager.current
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
                 .padding(paddingValues)
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
-        FotoCadastro(
-            uri = viewModel.imagemUri,
-            onImagemUriChange = { galleryLauncher.launch("image/*")
-            })
-        Spacer(modifier = Modifier.height(16.dp))
+            FotoCadastro(
+                uri = uiState.imagemUri,
+                onImagemUriChange = {
+                    galleryLauncher.launch("image/*")
+                })
+            Spacer(modifier = Modifier.height(16.dp))
 
-        FormCadastroMed(
-            nome = viewModel.nomeMed,
-            onNomeChange = { novoNome ->
-                viewModel.onNomeMedChange(novoNome)
-            },
-            nomeErro = viewModel.nomeMedErro,
+            FormCadastroMed(
+                nome = uiState.nomeMed,
+                onNomeChange = viewModel::onNomeMedChange,
+                nomeErro = uiState.nomeMedErro,
+                dosagem = uiState.dosagem,
+                onDosagemChange = viewModel::onDosagemChange,
+                dosagemErro = uiState.dosagemErro,
+                instrucoes = uiState.instrucoes,
+                onInstrucoesChange = viewModel::onInstrucoesChange
+            )
 
-            dosagem = viewModel.dosagem,
-            onDosagemChange = { novaDosagem ->
-                viewModel.onDosagemChange(novaDosagem)
-            },
-            dosagemErro = viewModel.dosagemErro,
+            Spacer(modifier = Modifier.height(16.dp))
 
-            instrucoes = viewModel.instrucoes,
-            onInstrucoesChange = { novasInstrucoes ->
-                viewModel.onInstrucoesChange(novasInstrucoes)
-            }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SelecaoHorarios(
-            horarios = viewModel.listaHorarios,
-            onAdicionarHorario = { viewModel.onAdicionarHorario() },
-            onAtualizarHorario = viewModel::onAtualizarHorario,
-            onRemoverHorario = viewModel::onRemoverHorario,
-            indexEditando = viewModel.indexHorarioEditando,
-            onSetEditando = viewModel::setEditando
-        )
+            SelecaoHorarios(
+                horarios = uiState.listaHorarios,
+                onAdicionarHorario = { viewModel.onAdicionarHorario() },
+                onAtualizarHorario = viewModel::onAtualizarHorario,
+                onRemoverHorario = viewModel::onRemoverHorario,
+                indexEditando = uiState.indexHorarioEditando,
+                onSetEditando = viewModel::setEditando
+            )
         }
     }
 }
@@ -158,6 +171,7 @@ fun FormCadastroMed(
     instrucoes: String,
     onInstrucoesChange: (String) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedTextField(
             value = nome,
@@ -166,6 +180,10 @@ fun FormCadastroMed(
             },
             label = { Text("Nome do medicamento") },
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) } ),
             isError = nomeErro,
             supportingText = {
                 if (nomeErro) {
@@ -178,6 +196,10 @@ fun FormCadastroMed(
             onValueChange = onDosagemChange,
             label = { Text("Dosagem") },
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) } ),
             isError = dosagemErro,
             supportingText = {
                 if (dosagemErro) {
@@ -190,11 +212,14 @@ fun FormCadastroMed(
             onValueChange = onInstrucoesChange,
             label = { Text("Instruções") },
             modifier = Modifier.fillMaxWidth(),
-            minLines = 3
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.clearFocus() } ),
+            minLines = 3,
+            maxLines = 5
         )
     }
 }
-
 
 
 @Composable
@@ -221,18 +246,15 @@ private fun ImagemSelecionada(uri: Uri) {
 fun BotaoSalvar(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    enabled: Boolean
 ) {
-    Button(onClick = onClick,
-        modifier.fillMaxWidth(),
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Text("SALVAR")
+        Text(if (enabled) "SALVAR" else "SALVANDO...")
     }
-}
-
-@Preview
-@Composable
-private fun BotaoSalvarPreview() {
-    BotaoSalvar()
 }
 
