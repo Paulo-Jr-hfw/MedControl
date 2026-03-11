@@ -21,63 +21,74 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.R
 import com.app.medcontrol.components.MedicamentoItem
 import com.app.medcontrol.components.MenuButton
 import com.app.medcontrol.components.ProgressBarDinamica
 import com.app.medcontrol.model.Medicamento
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(medicamentos: List<Medicamento>) {
+fun PacienteHomeScreen(
+    viewModel: PacienteHomeScreenViewModel = hiltViewModel(),
+    onNavigateToCadastroMed: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        item{Header()}
+        item{Header(nomeUsuario = uiState.nomeUser)}
         item{ProgressBar()}
-        item{RowButtons()}
-        secaoListaMedicamentos(medicamentos)
+        item{RowButtons(onNavigateToCadastroMed = onNavigateToCadastroMed)}
+        secaoListaMedicamentos(uiState.listaMedicamentos)
 
     }
     }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Header() {
+fun Header(nomeUsuario: String) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        GreetingText()
+        GreetingText(nome = nomeUsuario)
         DataAtualText()
     }
 }
 
 @Composable
-fun GreetingText() {
-    Text("Olá, USUARIO!")
-
+fun GreetingText(nome:String) {
+    Text(
+        text = "Olá, $nome",
+        fontWeight = FontWeight.Bold
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DataAtualText() {
     val hoje = LocalDate.now()
-    val formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM")
+    val localeBR = java.util.Locale("pt", "BR")
+    val formatter = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM", localeBR)
+    val dataFormatada = hoje.format(formatter).replaceFirstChar { it.uppercase() }
 
-    Text(hoje.format(formatter))
+    Text(text = dataFormatada)
 }
 
 @Composable
@@ -96,13 +107,13 @@ fun ProgressBar() {
 }
 
 @Composable
-fun RowButtons() {
+fun RowButtons(onNavigateToCadastroMed: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         MenuButton(
-            onClick = { /* Navegar */ },
+            onClick = onNavigateToCadastroMed,
             label = "REMÉDIOS",
             icon = { Icon(Icons.Default.Add, contentDescription = null) },
             modifier = Modifier.weight(1f)
@@ -133,24 +144,20 @@ fun LazyListScope.secaoListaMedicamentos(medicamentos: List<Medicamento>) {
         }
     }
 
-    items(medicamentos) { medicamento ->
-        MedicamentoItem(
-            medicamento = medicamento,
-            onCheckClick = { println("Medicamento ${medicamento.nome} tomado!") })
+    if (medicamentos.isEmpty()) {
+        item {
+            Text(
+                "Nenhum medicamento agendado.",
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = Color.Gray
+            )
+        }
+    } else {
+        items(medicamentos) { medicamento ->
+            MedicamentoItem(
+                medicamento = medicamento,
+                onCheckClick = { println("Medicamento ${medicamento.nome} tomado!") }
+            )
+        }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val listaFake = listOf(
-        Medicamento(1, "Dipirona", "500mg", "1 comprimido",null, listOf(LocalTime.of(8,0))),
-        Medicamento(2, "Amoxicilina", "875mg", "1 comprimido",null, listOf(LocalTime.of(12,0))),
-        Medicamento(3, "Vitamina C", "1g", "1 efervescente",null, listOf(LocalTime.of(9,0))),
-        Medicamento(1, "Dipirona", "500mg", "1 comprimido",null, listOf(LocalTime.of(8,0))),
-    Medicamento(2, "Amoxicilina", "875mg", "1 comprimido",null, listOf(LocalTime.of(12,0))),
-    Medicamento(3, "Vitamina C", "1g", "1 efervescente",null, listOf(LocalTime.of(9,0)))
-    )
-    HomeScreen(medicamentos = listaFake)
 }
