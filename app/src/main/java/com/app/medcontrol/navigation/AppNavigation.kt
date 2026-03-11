@@ -3,12 +3,15 @@ package com.app.medcontrol.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.app.medcontrol.screen.LoginScreen
-import com.app.medcontrol.screen.Paciente.HomeScreen
+import androidx.navigation.navArgument
+import com.app.medcontrol.screen.Paciente.PacienteHomeScreen
+import com.app.medcontrol.screen.cadastromed.CadastroMedScreen
 import com.app.medcontrol.screen.cadastrouser.CadastroUserScreen
+import com.app.medcontrol.screen.login.LoginScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -20,8 +23,8 @@ fun AppNavigation() {
         composable(Routes.Login.route) {
             LoginScreen(
                 onNavigateToCadastro = { navController.navigate(Routes.CadastroUser.route) },
-                onNavigateHome = {
-                    navController.navigate(Routes.HomeScreen.route) {
+                onNavigateHome = { id ->
+                    navController.navigate("${Routes.HomeScreen.route}/$id") {
                         popUpTo(Routes.Login.route) { inclusive = true }
                     }
                 }
@@ -34,8 +37,24 @@ fun AppNavigation() {
             )
         }
 
-        composable(Routes.HomeScreen.route) {
-            HomeScreen( medicamentos = emptyList())
+        composable(
+            route = "${Routes.HomeScreen.route}/{usuarioId}",
+            arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+        ) {backStackEntry ->
+            val idLogado = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+            PacienteHomeScreen(
+                onNavigateToCadastroMed = {
+                    navController.navigate("${Routes.CadastroMed.route}/$idLogado")
+                }
+            )
+        }
+
+        composable(route = "${Routes.CadastroMed.route}/{usuarioId}",
+            arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+        ) {
+            CadastroMedScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

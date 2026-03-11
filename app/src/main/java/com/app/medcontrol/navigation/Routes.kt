@@ -5,5 +5,7 @@ sealed class Routes (val route: String) {
     object CadastroUser: Routes("cadastro_user")
     object HomeScreen: Routes("home_screen")
 
+    object CadastroMed: Routes("cadastro_med")
+
 
 }
