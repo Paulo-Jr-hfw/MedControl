@@ -1,8 +1,9 @@
-package com.app.medcontrol.data
+package com.app.medcontrol.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.app.medcontrol.data.entity.UsuarioEntity
 
 @Dao
 interface UsuarioDao {

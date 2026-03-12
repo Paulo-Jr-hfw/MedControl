@@ -1,4 +1,4 @@
-package com.app.medcontrol.data
+package com.app.medcontrol.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

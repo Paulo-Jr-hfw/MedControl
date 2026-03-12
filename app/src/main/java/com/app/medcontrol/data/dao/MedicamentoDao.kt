@@ -1,4 +1,4 @@
-package com.app.medcontrol.data
+package com.app.medcontrol.data.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,11 +6,12 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.app.medcontrol.data.entity.MedicamentoEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MedicamentoDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun saveMedicamento(medicamento: MedicamentoEntity)
 
     @Update
@@ -25,8 +26,8 @@ interface MedicamentoDao {
     @Query("DELETE FROM medicamentos WHERE id = :id")
     suspend fun deleteById(id: Int)
 
-    @Query( "SELECT * FROM medicamentos WHERE usuarioId = :usuarioId")
-    fun getMedicamentosByUsuarioId(usuarioId: Int): Flow<List<MedicamentoEntity>>
+    @Query("SELECT * FROM medicamentos WHERE usuarioId = :usuarioId")
+    suspend fun getMedicamentosByUsuarioIdList(usuarioId: Int): List<MedicamentoEntity>
 
 
     @Delete
