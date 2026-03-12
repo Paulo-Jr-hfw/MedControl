@@ -5,12 +5,19 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.app.medcontrol.data.dao.MedicamentoDao
+import com.app.medcontrol.data.dao.RegistroConsumoDao
+import com.app.medcontrol.data.dao.UsuarioDao
+import com.app.medcontrol.data.entity.MedicamentoEntity
+import com.app.medcontrol.data.entity.RegistroConsumoEntity
+import com.app.medcontrol.data.entity.UsuarioEntity
 
-@Database(entities = [MedicamentoEntity::class, UsuarioEntity::class], version = 1, exportSchema = false)
+@Database(entities = [MedicamentoEntity::class, UsuarioEntity::class, RegistroConsumoEntity::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun medicamentoDao(): MedicamentoDao
     abstract fun usuarioDao(): UsuarioDao
+    abstract fun registroConsumoDao(): RegistroConsumoDao
 
     companion object {
         @Volatile

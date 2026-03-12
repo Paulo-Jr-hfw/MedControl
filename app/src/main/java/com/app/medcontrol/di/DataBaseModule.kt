@@ -3,8 +3,9 @@ package com.app.medcontrol.di
 import android.content.Context
 import androidx.room.Room
 import com.app.medcontrol.data.AppDataBase
-import com.app.medcontrol.data.MedicamentoDao
-import com.app.medcontrol.data.UsuarioDao
+import com.app.medcontrol.data.dao.MedicamentoDao
+import com.app.medcontrol.data.dao.RegistroConsumoDao
+import com.app.medcontrol.data.dao.UsuarioDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,5 +39,11 @@ object DataBaseModule {
     @Singleton
     fun provideUsuarioDao(dataBase: AppDataBase) : UsuarioDao {
         return dataBase.usuarioDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRegistroConsumoDao(dataBase: AppDataBase): RegistroConsumoDao {
+        return dataBase.registroConsumoDao()
     }
 }

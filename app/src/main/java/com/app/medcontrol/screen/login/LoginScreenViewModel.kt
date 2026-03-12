@@ -2,8 +2,8 @@ package com.app.medcontrol.screen.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.medcontrol.data.UsuarioDao
-import com.app.medcontrol.data.UsuarioEntity
+import com.app.medcontrol.data.dao.UsuarioDao
+import com.app.medcontrol.data.entity.UsuarioEntity
 import com.app.medcontrol.model.TipoUsuario
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
