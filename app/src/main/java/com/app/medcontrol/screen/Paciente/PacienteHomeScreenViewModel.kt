@@ -115,7 +115,7 @@ data class DoseAgendada(
     val registroId: Int,
     val nomeMedicamento: String,
     val dosagem: String,
-    val horarioAgendado: java.time.LocalTime,
-    val status: com.app.medcontrol.data.entity.StatusConsumo,
+    val horarioAgendado: LocalTime,
+    val status: StatusConsumo,
     val imagemUri: String?
 )
