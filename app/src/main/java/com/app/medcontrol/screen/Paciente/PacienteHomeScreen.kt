@@ -3,6 +3,7 @@ package com.app.medcontrol.screen.Paciente
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.R
+import com.app.medcontrol.components.DoseItemHome
 import com.app.medcontrol.components.MedicamentoItem
 import com.app.medcontrol.components.MenuButton
 import com.app.medcontrol.components.ProgressBarDinamica
@@ -54,10 +57,14 @@ fun PacienteHomeScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         item{Header(nomeUsuario = uiState.nomeUser)}
-        item{ProgressBar()}
+        item{ProgressBar(total = uiState.totalDosesDia, tomadas = uiState.dosesTomadas)}
         item{RowButtons(onNavigateToCadastroMed = onNavigateToCadastroMed)}
-        secaoListaMedicamentos(uiState.listaMedicamentos)
-
+        secaoListaMedicamentos(
+            doses = uiState.dosesPendentes,
+            onConfirmar = { registroId ->
+                viewModel.marcarComoTomado(registroId)
+            }
+        )
     }
     }
 
@@ -92,7 +99,7 @@ fun DataAtualText() {
 }
 
 @Composable
-fun ProgressBar() {
+fun ProgressBar(total: Int, tomadas: Int) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -101,7 +108,10 @@ fun ProgressBar() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("Progresso de hoje")
-            ProgressBarDinamica(progresso = 0.5f)
+            ProgressBarDinamica(
+                total = total,
+                tomadas = tomadas
+            )
         }
     }
 }
@@ -135,28 +145,45 @@ fun RowButtons(onNavigateToCadastroMed: () -> Unit) {
 }
 
 
-fun LazyListScope.secaoListaMedicamentos(medicamentos: List<Medicamento>) {
+fun LazyListScope.secaoListaMedicamentos(
+    doses: List<DoseAgendada>,
+    onConfirmar: (Int) -> Unit
+) {
     item {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Schedule, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Próximos medicamentos")
-        }
+        Text(
+            text = "Próximas doses de hoje",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 8.dp),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
     }
 
-    if (medicamentos.isEmpty()) {
+    if (doses.isEmpty()) {
         item {
-            Text(
-                "Nenhum medicamento agendado.",
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = Color.Gray
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Tudo em dia! Nenhuma dose pendente.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
         }
     } else {
-        items(medicamentos) { medicamento ->
-            MedicamentoItem(
-                medicamento = medicamento,
-                onCheckClick = { println("Medicamento ${medicamento.nome} tomado!") }
+
+        items(
+            items = doses,
+            key = { it.registroId }
+        ) { dose ->
+            DoseItemHome(
+                dose = dose,
+                onCheckClick = { id -> onConfirmar(id) }
             )
         }
     }

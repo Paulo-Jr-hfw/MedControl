@@ -6,8 +6,8 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.medcontrol.data.MedicamentoDao
-import com.app.medcontrol.data.MedicamentoEntity
+import com.app.medcontrol.data.dao.MedicamentoDao
+import com.app.medcontrol.data.entity.MedicamentoEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

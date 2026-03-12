@@ -1,5 +1,6 @@
 package com.app.medcontrol.data
 
+import com.app.medcontrol.data.entity.MedicamentoEntity
 import com.app.medcontrol.model.Medicamento
 
 fun MedicamentoEntity.toDomain(): Medicamento {
