@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Update
 import com.app.medcontrol.data.entity.RegistroComMedicamento
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.StatusConsumo
@@ -17,10 +16,7 @@ import java.time.LocalTime
 interface RegistroConsumoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun inserirRegistros(registros: List<RegistroConsumoEntity>)
-
-    @Update
-    suspend fun atualizarRegistro(registro: RegistroConsumoEntity)
+    suspend fun inserirRegistros(registros: List<RegistroConsumoEntity>) : List<Long>
 
     @Query("UPDATE registros_consumo SET status = :novoStatus, horarioReal = :horario WHERE id = :registroId")
     suspend fun marcarComoTomado(registroId: Int, novoStatus: StatusConsumo, horario: LocalTime)
@@ -41,6 +37,7 @@ interface RegistroConsumoDao {
     @Query("SELECT COUNT(*) FROM registros_consumo WHERE dataAgendada = :data AND status = 'TOMADO'")
     fun getDosesTomadasDoDia(data: LocalDate): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM registros_consumo WHERE dataAgendada = :data")
-    suspend fun verificarSeExisteDoseNoDia(data: LocalDate): Int
+    @Query("SELECT COUNT(*) FROM registros_consumo WHERE medicamentoId = :medicamentoId AND dataAgendada = :data")
+    suspend fun verificarSeExisteDoseNoDia(medicamentoId: Int, data: LocalDate): Int
+
 }

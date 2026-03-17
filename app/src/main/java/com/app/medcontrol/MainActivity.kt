@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import com.app.medcontrol.navigation.AppNavigation
+import com.app.medcontrol.service.notification.NotificationHelper
 import com.app.medcontrol.ui.theme.MedControlTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,6 +18,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        NotificationHelper(this).createNotificationChannel()
 
         setContent {
             MedControlTheme {
