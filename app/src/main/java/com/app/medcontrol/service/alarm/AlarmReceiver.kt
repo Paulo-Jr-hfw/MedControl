@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.app.medcontrol.MainActivity
-import com.app.medcontrol.R
 import com.app.medcontrol.service.notification.NotificationHelper
 
 class AlarmReceiver: BroadcastReceiver() {
