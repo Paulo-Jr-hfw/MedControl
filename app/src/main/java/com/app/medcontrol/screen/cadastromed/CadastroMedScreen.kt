@@ -1,7 +1,10 @@
 package com.app.medcontrol.screen.cadastromed
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -31,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +60,7 @@ fun CadastroMedScreen(
     viewModel: CadastroMedScreenViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
+
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -68,6 +74,24 @@ fun CadastroMedScreen(
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
+
+                is CadastroMedScreenViewModel.UiEvent.SolicitarPermissaoAlarme -> {
+                    val alarmManager =
+                        context.getSystemService(android.app.AlarmManager::class.java)
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                        !alarmManager.canScheduleExactAlarms()
+                    ) {
+                        viewModel.mostrarDialogoPermissao()
+                    } else {
+                        viewModel.onSalvaMedicamento()
+                    }
+                }
+
+                is CadastroMedScreenViewModel.UiEvent.SalvarMedicamento -> {
+                    viewModel.confirmarSalvar()
+                }
+
                 is CadastroMedScreenViewModel.UiEvent.CadastroSucesso -> {
                     Toast.makeText(context, "Medicamento salvo!", Toast.LENGTH_SHORT).show()
                     onNavigateBack()
@@ -85,10 +109,12 @@ fun CadastroMedScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().imePadding(),
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(),
         bottomBar = {
             BotaoSalvar(
-                onClick = { viewModel.onSalvaMedicamento() },
+                onClick = { viewModel.onSalvarClick() },
                 enabled = !uiState.isLoading,
                 modifier = Modifier.padding(16.dp)
             )
@@ -136,6 +162,25 @@ fun CadastroMedScreen(
                 onSetEditando = viewModel::setEditando
             )
         }
+    }
+    if (uiState.mostrarDialogoPermissao) {
+        DialogoPermissaoAlarme(
+            onConfirmar = {
+                viewModel.fecharDialogoPermissao()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                }
+            },
+            onDispensar = { viewModel.fecharDialogoPermissao() },
+            onAgoraNao = {
+                viewModel.fecharDialogoPermissao()
+                // Chama o salvar diretamente (o AlarmScheduler tratará a falta de permissão)
+                viewModel.onSalvaMedicamento()
+            }
+        )
     }
 }
 
@@ -258,3 +303,21 @@ fun BotaoSalvar(
     }
 }
 
+@Composable
+fun DialogoPermissaoAlarme(
+    onConfirmar: () -> Unit,
+    onDispensar: () -> Unit,
+    onAgoraNao: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDispensar,
+        title = { Text("Permissão de Alarme") },
+        text = { Text("Para que o alarme toque exatamente na hora certa, precisamos de uma permissão especial. Deseja configurar agora?") },
+        confirmButton = {
+            TextButton(onClick = onConfirmar) { Text("Configurar") }
+        },
+        dismissButton = {
+            TextButton(onClick = onAgoraNao) { Text("Agora não") }
+        }
+    )
+}

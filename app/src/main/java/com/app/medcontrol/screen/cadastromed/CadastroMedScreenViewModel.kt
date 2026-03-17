@@ -29,7 +29,8 @@ data class CadastroMedUiState(
     val nomeMedErro: Boolean = false,
     val dosagemErro: Boolean = false,
     val isLoading: Boolean = false,
-    val indexHorarioEditando: Int? = null
+    val indexHorarioEditando: Int? = null,
+    val mostrarDialogoPermissao: Boolean = false
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -48,6 +49,8 @@ class CadastroMedScreenViewModel @Inject constructor(
     sealed class UiEvent {
         object CadastroSucesso : UiEvent()
         data class ShowError(val message: String) : UiEvent()
+        object SolicitarPermissaoAlarme : UiEvent()
+        object SalvarMedicamento : UiEvent()
     }
 
 
@@ -136,6 +139,26 @@ class CadastroMedScreenViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
+    }
+
+    fun onSalvarClick() {
+        viewModelScope.launch {
+            _uiEvent.send(UiEvent.SolicitarPermissaoAlarme)
+        }
+    }
+
+    fun mostrarDialogoPermissao() {
+        _uiState.update { it.copy(mostrarDialogoPermissao = true) }
+    }
+
+    fun confirmarSalvar() {
+        viewModelScope.launch {
+            _uiEvent.send(UiEvent.SalvarMedicamento)
+        }
+    }
+
+    fun fecharDialogoPermissao() {
+        _uiState.update { it.copy(mostrarDialogoPermissao = false) }
     }
 }
 

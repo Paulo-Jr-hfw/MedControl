@@ -10,6 +10,7 @@ import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.dao.UsuarioDao
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.StatusConsumo
+import com.app.medcontrol.service.AlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -26,6 +28,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
     private val usuarioDao: UsuarioDao,
     private val medicamentoDao: MedicamentoDao,
     private val registroDao: RegistroConsumoDao,
+    private val alarmScheduler: AlarmScheduler,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -36,7 +39,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
         registroDao.getDosesPendentesComDetalhes(hoje),
         registroDao.getTotalDosesDoDia(hoje),
         registroDao.getDosesTomadasDoDia(hoje)
-    ) { registrosComMed, total, tomadas -> // CORREÇÃO: Nome da variável batendo com o map abaixo
+    ) { registrosComMed, total, tomadas ->
         val usuario = usuarioDao.getUsuarioById(usuarioId)
 
         val listaDoses = registrosComMed.map { item ->
@@ -64,18 +67,22 @@ class PacienteHomeScreenViewModel @Inject constructor(
     )
 
     init {
-        sincronizarDosesDiarias()
+        observarMedicamentos()
     }
 
-    private fun sincronizarDosesDiarias() {
-        viewModelScope.launch {
-            val existeDose = registroDao.verificarSeExisteDoseNoDia(hoje)
+    private suspend fun sincronizarDosesDiarias() {
+        val medicamentos = medicamentoDao.getMedicamentosByUsuarioIdList(usuarioId)
+        val agora = LocalDateTime.now()
 
-            if (existeDose == 0) {
-                val medicamentos = medicamentoDao.getMedicamentosByUsuarioIdList(usuarioId)
 
-                val novosRegistros = medicamentos.flatMap { med ->
-                    med.horario.map { hora ->
+        medicamentos.forEach { med ->
+            val dosesDoMedHoje = registroDao.verificarSeExisteDoseNoDia(med.id, hoje)
+
+            if (dosesDoMedHoje == 0) {
+                val horariosFuturos = med.horario.filter { it.isAfter(agora.toLocalTime()) }
+
+                if (horariosFuturos.isNotEmpty()) {
+                    val novosRegistros = horariosFuturos.map { hora ->
                         RegistroConsumoEntity(
                             medicamentoId = med.id,
                             dataAgendada = hoje,
@@ -83,11 +90,32 @@ class PacienteHomeScreenViewModel @Inject constructor(
                             status = StatusConsumo.PENDENTE
                         )
                     }
-                }
 
-                if (novosRegistros.isNotEmpty()) {
-                    registroDao.inserirRegistros(novosRegistros)
+                    val idsGerados = registroDao.inserirRegistros(novosRegistros)
+
+                    idsGerados.forEachIndexed { index, idLong ->
+                        val registroId = idLong.toInt()
+                        val registro = novosRegistros[index]
+                        val agora = LocalDateTime.now()
+                        val horarioDose = LocalDateTime.of(hoje, registro.horarioAgendado)
+
+                        if (horarioDose.isAfter(agora)) {
+                            alarmScheduler.agendarAlarme(
+                                registroId = registroId,
+                                horarioAgendado = horarioDose,
+                                nomeMed = med.nome
+                            )
+                        }
+                    }
                 }
+            }
+        }
+    }
+
+    private fun observarMedicamentos() {
+        viewModelScope.launch {
+            medicamentoDao.getAllMedicamentosByUsuarioId(usuarioId).collect { medicamentos ->
+                sincronizarDosesDiarias()
             }
         }
     }
