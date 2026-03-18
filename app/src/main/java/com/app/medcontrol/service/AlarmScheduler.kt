@@ -33,7 +33,7 @@ class AlarmScheduler( private val context: Context) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                // Se não tem permissão, agendamos como "não exato" para não fechar o app
+                // Se não tem permissão, agenda como "não exato" para não fechar o app
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     tempoMillis,
@@ -48,5 +48,20 @@ class AlarmScheduler( private val context: Context) {
             tempoMillis,
             pendingIntent
         )
+    }
+
+    fun cancelarAlarme(registroId: Int) {
+        val intent = Intent(context, AlarmReceiver::class.java)
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            registroId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
     }
 }
