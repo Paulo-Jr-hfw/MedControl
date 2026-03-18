@@ -40,4 +40,25 @@ interface RegistroConsumoDao {
     @Query("SELECT COUNT(*) FROM registros_consumo WHERE medicamentoId = :medicamentoId AND dataAgendada = :data")
     suspend fun verificarSeExisteDoseNoDia(medicamentoId: Int, data: LocalDate): Int
 
+    @Transaction
+    @Query("""
+    SELECT * FROM registros_consumo 
+    WHERE dataAgendada = :data 
+    AND status IN ('PENDENTE', 'ATRASADO')
+""")
+    suspend fun getDosesPendentesParaReagendamento(data: LocalDate): List<RegistroComMedicamento>
+
+    @Query("""
+    UPDATE registros_consumo 
+    SET status = :novoStatus 
+    WHERE id IN (:ids)
+""")
+    suspend fun atualizarStatusEmMassa(ids: List<Int>, novoStatus: StatusConsumo)
+
+    @Query("UPDATE registros_consumo SET status = :novoStatus WHERE id = :registroId")
+    suspend fun atualizarStatus(registroId: Int, novoStatus: StatusConsumo)
+
+    @Query("SELECT * FROM registros_consumo WHERE id = :registroId")
+    suspend fun getRegistroById(registroId: Int): RegistroConsumoEntity
+
 }

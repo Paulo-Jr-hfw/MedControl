@@ -122,11 +122,16 @@ class PacienteHomeScreenViewModel @Inject constructor(
 
     fun marcarComoTomado(registroId: Int) {
         viewModelScope.launch {
+            try {
             registroDao.marcarComoTomado(
                 registroId = registroId,
                 novoStatus = StatusConsumo.TOMADO,
-                horario = LocalTime.now() // CORREÇÃO: java.time.LocalTime
+                horario = LocalTime.now()
             )
+                alarmScheduler.cancelarAlarme(registroId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
