@@ -1,6 +1,5 @@
 package com.app.medcontrol.components
 
-import com.app.medcontrol.R
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
@@ -26,9 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.app.medcontrol.R
 import com.app.medcontrol.data.entity.StatusConsumo
 import com.app.medcontrol.screen.Paciente.DoseAgendada
 import java.time.LocalTime
@@ -41,14 +40,14 @@ enum class CartaoStatus {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun obterStatusDose(horarioAgendado: LocalTime): CartaoStatus {
+fun obterStatusDose(statusNoBanco: StatusConsumo, horarioAgendado: LocalTime): CartaoStatus {
     val agora = LocalTime.now()
-    val umaHoraAtras = agora.minusHours(1)
-    val dozeHorasAtras = agora.minusHours(12)
+    if (statusNoBanco == StatusConsumo.TOMADO) return CartaoStatus.NORMAL
 
     return when {
-        horarioAgendado.isBefore(dozeHorasAtras) -> CartaoStatus.CRITICO
-        horarioAgendado.isBefore(umaHoraAtras) -> CartaoStatus.ATRASADO
+        statusNoBanco == StatusConsumo.TOMADO -> CartaoStatus.NORMAL
+        horarioAgendado.isBefore(agora.minusHours(8)) -> CartaoStatus.CRITICO
+        horarioAgendado.isBefore(agora) -> CartaoStatus.ATRASADO
         else -> CartaoStatus.NORMAL
     }
 }
@@ -59,7 +58,7 @@ fun DoseItemHome(
     dose: DoseAgendada,
     onCheckClick: (Int) -> Unit
 ) {
-    val status = obterStatusDose(dose.horarioAgendado)
+    val status = obterStatusDose(dose.status, dose.horarioAgendado)
 
     // Define a cor baseada no status
     val containerColor = when (status) {
@@ -137,24 +136,4 @@ fun DoseItemHome(
             }
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true, name = "Normal")
-@Composable
-private fun PreviewNormal() {
-    DoseItemHome(
-        dose = DoseAgendada(1, "Dipirona", "1 comprimido", LocalTime.now().plusHours(2), StatusConsumo.PENDENTE, null),
-        onCheckClick = {}
-    )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true, name = "Atrasado")
-@Composable
-private fun PreviewAtrasado() {
-    DoseItemHome(
-        dose = DoseAgendada(1, "Dipirona", "1 comprimido", LocalTime.now().minusHours(2), StatusConsumo.PENDENTE, null),
-        onCheckClick = {}
-    )
 }
