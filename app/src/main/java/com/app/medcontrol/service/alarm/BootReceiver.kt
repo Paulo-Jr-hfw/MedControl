@@ -36,7 +36,7 @@ class BootReceiver : BroadcastReceiver() {
                     val agora = LocalTime.now()
 
                     val registrosParaReagendar =
-                        registroDao.getDosesPendentesParaReagendamento(hoje)
+                        registroDao.getDosesPendentesList(hoje)
                     val idsParaMarcarComoAtrasado = mutableListOf<Int>()
 
                     registrosParaReagendar.forEach { item ->
