@@ -1,7 +1,6 @@
 package com.app.medcontrol.data.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -33,8 +32,14 @@ interface MedicamentoDao {
     fun getAllMedicamentosByUsuarioId(usuarioId: Int): Flow<List<MedicamentoEntity>>
 
 
-    @Delete
-    suspend fun deleteMedicamento(medicamento: MedicamentoEntity)
+    @Query("UPDATE medicamentos SET ativo = 0 WHERE id = :id")
+    suspend fun desativarMedicamento(id: Int)
+
+    @Query("SELECT * FROM medicamentos WHERE ativo = 1")
+    fun getAllMedicamentosAtivosFlow(): Flow<List<MedicamentoEntity>>
+
+    @Query("SELECT * FROM medicamentos WHERE ativo = 1")
+    suspend fun getMedicamentosAtivosList(usuarioId: Int): List<MedicamentoEntity>
 
 
 }
