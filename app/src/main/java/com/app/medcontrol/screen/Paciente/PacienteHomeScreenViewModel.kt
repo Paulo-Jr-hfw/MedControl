@@ -36,7 +36,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
     private val hoje = LocalDate.now()
 
     val uiState: StateFlow<HomeUiState> = combine(
-        registroDao.getDosesPendentesComDetalhes(hoje),
+        registroDao.getDosesPendentesFlow(hoje),
         registroDao.getTotalDosesDoDia(hoje),
         registroDao.getDosesTomadasDoDia(hoje)
     ) { registrosComMed, total, tomadas ->
@@ -71,8 +71,9 @@ class PacienteHomeScreenViewModel @Inject constructor(
     }
 
     private suspend fun sincronizarDosesDiarias() {
-        val medicamentos = medicamentoDao.getMedicamentosByUsuarioIdList(usuarioId)
+        val medicamentos = medicamentoDao.getMedicamentosAtivosList(usuarioId)
         val agora = LocalDateTime.now()
+        val hoje = LocalDate.now()
 
 
         medicamentos.forEach { med ->
