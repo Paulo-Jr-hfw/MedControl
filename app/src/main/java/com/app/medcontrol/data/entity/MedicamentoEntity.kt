@@ -13,5 +13,6 @@ data class MedicamentoEntity(
     val instrucoes: String? = null,
     val imagemUri: String? = null,
     val horario: List<LocalTime>,
-    val usuarioId: Int
+    val usuarioId: Int,
+    val ativo: Boolean = true
 )
