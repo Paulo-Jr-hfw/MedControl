@@ -32,7 +32,9 @@ class PacienteHomeScreenViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val usuarioId: Int = checkNotNull(savedStateHandle["usuarioId"])
+    private val usuarioId: Int = savedStateHandle.get<Int>("usuarioId")
+        ?: savedStateHandle.get<String>("usuarioId")?.toInt()
+        ?: throw IllegalArgumentException("usuarioId é obrigatório e deve ser um Int")
     private val hoje = LocalDate.now()
 
     val uiState: StateFlow<HomeUiState> = combine(
