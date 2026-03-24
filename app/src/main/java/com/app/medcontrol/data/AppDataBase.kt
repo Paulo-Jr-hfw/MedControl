@@ -12,7 +12,7 @@ import com.app.medcontrol.data.entity.MedicamentoEntity
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.UsuarioEntity
 
-@Database(entities = [MedicamentoEntity::class, UsuarioEntity::class, RegistroConsumoEntity::class], version = 5, exportSchema = false)
+@Database(entities = [MedicamentoEntity::class, UsuarioEntity::class, RegistroConsumoEntity::class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun medicamentoDao(): MedicamentoDao

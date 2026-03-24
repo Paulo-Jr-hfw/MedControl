@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.app.medcontrol.screen.Paciente.PacienteHomeScreen
 import com.app.medcontrol.screen.cadastromed.CadastroMedScreen
 import com.app.medcontrol.screen.cadastrouser.CadastroUserScreen
 import com.app.medcontrol.screen.login.LoginScreen
@@ -18,7 +17,10 @@ import com.app.medcontrol.screen.login.LoginScreen
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController, startDestination = Routes.Login.route) {
+    NavHost(
+        navController = navController,
+        startDestination = Routes.Login.route
+    ) {
 
         composable(Routes.Login.route) {
             LoginScreen(
@@ -37,23 +39,25 @@ fun AppNavigation() {
             )
         }
 
-        composable(
-            route = "${Routes.HomeScreen.route}/{usuarioId}",
-            arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
-        ) {backStackEntry ->
-            val idLogado = backStackEntry.arguments?.getInt("usuarioId") ?: 0
-            PacienteHomeScreen(
-                onNavigateToCadastroMed = {
-                    navController.navigate("${Routes.CadastroMed.route}/$idLogado")
-                }
-            )
-        }
-
         composable(route = "${Routes.CadastroMed.route}/{usuarioId}",
             arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
         ) {
             CadastroMedScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "${Routes.HomeScreen.route}/{usuarioId}",
+            arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+        ) {backStackEntry ->
+            val idLogado = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+
+            MainContainer(
+                usuarioId = idLogado,
+                onNavigateToGlobalRoute = { rotaGlobal ->
+                    navController.navigate(rotaGlobal)
+                }
             )
         }
     }
