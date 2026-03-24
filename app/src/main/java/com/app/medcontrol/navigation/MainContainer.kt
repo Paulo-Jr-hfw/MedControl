@@ -23,7 +23,6 @@ fun MainContainer(
 ) {
 
     val internalNavController = rememberNavController()
-    val homeRouteWithArg = "${Routes.HomeScreen.route}?usuarioId={usuarioId}"
     val queryArg = "?usuarioId={usuarioId}"
 
     Scaffold(
