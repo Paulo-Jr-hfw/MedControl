@@ -1,6 +1,7 @@
 package com.app.medcontrol.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
@@ -16,7 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 
 sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: String) {
     object Home : BottomNavItem("Home", Icons.Default.Home, "home_screen")
-    object Meds : BottomNavItem("Remédios", Icons.Default.List, "medicamentos")
+    object Meds : BottomNavItem("Remédios", Icons.AutoMirrored.Filled.List, "medicamentos")
     object Sinais : BottomNavItem("Sinais", Icons.Default.Favorite, "sinais")
 }
 
