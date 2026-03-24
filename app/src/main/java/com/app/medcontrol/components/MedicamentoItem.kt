@@ -2,15 +2,21 @@ package com.app.medcontrol.components
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,80 +28,94 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.app.medcontrol.R
+import com.app.medcontrol.data.entity.MedicamentoEntity
 import com.app.medcontrol.model.Medicamento
+import com.app.medcontrol.screen.medicamento.MedicamentoUI
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MedicamentoItem(
-    medicamento: Medicamento,
-    onCheckClick: (() -> Unit)? = null
+    medicamento: MedicamentoUI,
+    onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit
 ) {
-    val horariosFormatados = medicamento.horario.joinToString(separator = " • ") {
-        it.format(DateTimeFormatter.ofPattern("HH:mm"))
-    }
     Card(
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .clickable { onEditClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(12.dp)
+        ) {
             Card(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(70.dp)
                     .padding(8.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                AsyncImage(
-                    model = medicamento.imagemUri,
-                    contentDescription = null,
-                    placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+                if (!medicamento.imagemUri.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = medicamento.imagemUri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Info, contentDescription = null, tint = Color.Gray)
+                    }
+                }
             }
             Column(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(1f)
             ) {
-                Text(text = medicamento.nome)
-                Text(text = medicamento.dosagem)
-                Text(text = medicamento.instrucoes)
                 Text(
-                    text = horariosFormatados,
+                    text = medicamento.nome,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${medicamento.dosagem}",
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (!medicamento.instrucoes.isNullOrBlank()) {
+                    Text(
+                        text = medicamento.instrucoes,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+                Text(
+                    text = medicamento.horariosFormatados,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             }
-            onCheckClick?.let { acao ->
-                IconButton(onClick = acao) {
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = Color.Companion.Green
-                    )
-                }
+            IconButton(onClick = onDeleteClick) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Excluir",
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                )
             }
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun MedicamentoItemPreview() {
-    val medicamentoTeste = Medicamento(
-        medicamentoId = 1,
-        nome = "Dipirona",
-        dosagem = "500mg",
-        instrucoes = "Tomar após as refeições",
-        horario = listOf(LocalTime.of(8, 0), LocalTime.of(20, 0)),
-        imagemUri = null
-    )
-    MedicamentoItem(medicamento = medicamentoTeste)
 }

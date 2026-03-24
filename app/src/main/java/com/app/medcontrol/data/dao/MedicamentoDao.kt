@@ -13,9 +13,6 @@ interface MedicamentoDao {
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun saveMedicamento(medicamento: MedicamentoEntity)
 
-    @Update
-    suspend fun update(medicamento: MedicamentoEntity)
-
     @Query("SELECT * FROM medicamentos ORDER BY nome ASC")
     fun getAllMedicamentos(): Flow<List<MedicamentoEntity>>
 
@@ -35,11 +32,14 @@ interface MedicamentoDao {
     @Query("UPDATE medicamentos SET ativo = 0 WHERE id = :id")
     suspend fun desativarMedicamento(id: Int)
 
-    @Query("SELECT * FROM medicamentos WHERE ativo = 1")
-    fun getAllMedicamentosAtivosFlow(): Flow<List<MedicamentoEntity>>
+    @Query("SELECT * FROM medicamentos WHERE usuarioId = :usuarioId AND ativo = 1")
+    fun getAllMedicamentosAtivosFlow(usuarioId: Int): Flow<List<MedicamentoEntity>>
 
-    @Query("SELECT * FROM medicamentos WHERE ativo = 1")
+    @Query("SELECT * FROM medicamentos WHERE usuarioId = :usuarioId AND ativo = 1")
     suspend fun getMedicamentosAtivosList(usuarioId: Int): List<MedicamentoEntity>
+
+    @Update
+    suspend fun updateMedicamento(medicamento: MedicamentoEntity)
 
 
 }
