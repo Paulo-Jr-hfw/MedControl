@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.app.medcontrol.data.AppDataBase
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
+import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.dao.UsuarioDao
 import com.app.medcontrol.service.AlarmScheduler
 import dagger.Module
@@ -52,5 +53,11 @@ object DataBaseModule {
     @Singleton
     fun provideAlarmScheduler(@ApplicationContext context: Context): AlarmScheduler {
         return AlarmScheduler(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSinaisDao(dataBase: AppDataBase) : SinaisDao {
+        return dataBase.sinaisDao()
     }
 }
