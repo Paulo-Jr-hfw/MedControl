@@ -53,6 +53,9 @@ fun MainContainer(
                 PacienteHomeScreen(
                     onNavigateToCadastroMed = {
                         onNavigateToGlobalRoute("${Routes.CadastroMed.route}/$idRecuperado")
+                    },
+                    onNavigateToCadastroSinais = {
+                        onNavigateToGlobalRoute("${Routes.CadastroSinais.route}/$idRecuperado")
                     }
                 )
             }

@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.app.medcontrol.screen.cadastromed.CadastroMedScreen
+import com.app.medcontrol.screen.cadastrosinais.CadastroSinaisScreen
 import com.app.medcontrol.screen.cadastrouser.CadastroUserScreen
 import com.app.medcontrol.screen.login.LoginScreen
 
@@ -43,6 +44,14 @@ fun AppNavigation() {
             arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
         ) {
             CadastroMedScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "${Routes.CadastroSinais.route}/{usuarioId}",
+            arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+        ){
+            CadastroSinaisScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

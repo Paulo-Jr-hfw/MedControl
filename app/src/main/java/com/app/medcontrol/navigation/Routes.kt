@@ -9,6 +9,7 @@ sealed class Routes(val route: String) {
     object CadastroMed: Routes("cadastro_med")
     object Medicamentos : Routes("medicamentos")
     object Sinais : Routes("sinais")
+    object CadastroSinais : Routes("cadastro_sinais")
     object Historico : Routes("historico")
 
 }
