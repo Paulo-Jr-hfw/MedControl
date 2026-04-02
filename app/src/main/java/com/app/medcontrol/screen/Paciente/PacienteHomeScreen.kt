@@ -41,7 +41,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PacienteHomeScreen(
     viewModel: PacienteHomeScreenViewModel = hiltViewModel(),
-    onNavigateToCadastroMed: () -> Unit
+    onNavigateToCadastroMed: () -> Unit,
+    onNavigateToCadastroSinais: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -53,7 +54,12 @@ fun PacienteHomeScreen(
     ) {
         item{Header(nomeUsuario = uiState.nomeUser)}
         item{ProgressBar(total = uiState.totalDosesDia, tomadas = uiState.dosesTomadas)}
-        item{RowButtons(onNavigateToCadastroMed = onNavigateToCadastroMed)}
+        item{
+            RowButtons(
+                onNavigateToCadastroMed = onNavigateToCadastroMed,
+                onNavigateToCadastroSinais = onNavigateToCadastroSinais
+            )
+        }
         secaoListaMedicamentos(
             doses = uiState.dosesPendentes,
             onConfirmar = { registroId ->
@@ -112,7 +118,10 @@ fun ProgressBar(total: Int, tomadas: Int) {
 }
 
 @Composable
-fun RowButtons(onNavigateToCadastroMed: () -> Unit) {
+fun RowButtons(
+    onNavigateToCadastroMed: () -> Unit,
+    onNavigateToCadastroSinais: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -124,7 +133,7 @@ fun RowButtons(onNavigateToCadastroMed: () -> Unit) {
             modifier = Modifier.weight(1f)
         )
         MenuButton(
-            onClick = { /* Navegar */ },
+            onClick = { onNavigateToCadastroSinais() },
             label = "SINAIS",
             icon = {
                 Icon(
