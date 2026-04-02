@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import com.app.medcontrol.model.ui.MedicamentoUI
 
 
 @HiltViewModel
@@ -83,12 +84,3 @@ sealed class MedicamentoUiEvent {
     data class MostrarSnackbar(val mensagem: String) : MedicamentoUiEvent()
 }
 
-data class MedicamentoUI(
-    val id: Int,
-    val nome: String,
-    val dosagem: String,
-    val instrucoes: String?,
-    val horariosFormatados: String,
-    val imagemUri: String?,
-    val entityOriginal: MedicamentoEntity
-)

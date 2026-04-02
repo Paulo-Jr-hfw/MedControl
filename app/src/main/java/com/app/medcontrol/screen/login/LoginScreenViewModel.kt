@@ -3,8 +3,9 @@ package com.app.medcontrol.screen.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.medcontrol.data.dao.UsuarioDao
-import com.app.medcontrol.data.entity.UsuarioEntity
 import com.app.medcontrol.model.TipoUsuario
+import com.app.medcontrol.model.Usuario
+import com.app.medcontrol.model.ui.LoginUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,15 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class LoginUiState(
-    val email: String = "",
-    val senha: String = "",
-    val isLoading: Boolean = false,
-    val loginError: Boolean = false,
-    val sucesso: Boolean = false,
-    val usuarioLogado: UsuarioEntity? = null,
-    val mensagemErro: String = ""
-)
+
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
     private val usuarioDao: UsuarioDao
@@ -52,14 +45,23 @@ class LoginScreenViewModel @Inject constructor(
         if (currentState.email.isBlank() || currentState.senha.isBlank()) return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true)}
+
             val usuario = usuarioDao.login(currentState.email, currentState.senha)
+
             if (usuario != null && usuario.tipo == tipoSelecionado.name) {
+                val usuarioLogadoParaApp = Usuario(
+                    usuarioId = usuario.id,
+                    nome = usuario.nome,
+                    email = usuario.email,
+                    senha = "",
+                    tipo = TipoUsuario.valueOf(usuario.tipo)
+                )
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         loginError = false,
                         sucesso = true,
-                        usuarioLogado = usuario
+                        usuarioLogado = usuarioLogadoParaApp
                     )
                 }
             } else if (usuario != null) {
