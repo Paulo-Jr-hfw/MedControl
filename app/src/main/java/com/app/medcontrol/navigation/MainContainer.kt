@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import com.app.medcontrol.components.NavigationMenu
 import com.app.medcontrol.screen.Paciente.PacienteHomeScreen
 import com.app.medcontrol.screen.medicamento.MedicamentoScreen
+import com.app.medcontrol.screen.sinais.SinaisScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -79,7 +80,12 @@ fun MainContainer(
                 route = "${Routes.Sinais.route}$queryArg",
                 arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
             ) {
-                // SinaisScreen(usuarioId = usuarioId)
+                SinaisScreen(
+                    onNavigateToManual = {
+                        onNavigateToGlobalRoute("${Routes.CadastroSinais.route}/$usuarioId")
+                    },
+                    onNavigateToRelogio = {}
+                )
             }
         }
     }

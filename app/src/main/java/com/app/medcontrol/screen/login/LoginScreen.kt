@@ -66,7 +66,7 @@ fun LoginScreen(
 
     LaunchedEffect(uiState.sucesso){
         if (uiState.sucesso) {
-            val idUsuario = uiState.usuarioLogado?.id ?: 0
+            val idUsuario = uiState.usuarioLogado?.usuarioId ?: 0
 
             onNavigateHome(idUsuario)
             viewModel.resetSucessoLogin()
