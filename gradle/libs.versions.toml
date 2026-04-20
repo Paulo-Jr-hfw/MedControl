@@ -1,6 +1,7 @@
 [versions]
 agp = "8.12.3"
 coilCompose = "2.7.0"
+connectClient = "1.1.0-alpha11"
 gson = "2.13.2"
 hiltAndroid = "2.51.1"
 hiltCompiler = "2.51.1"
@@ -22,6 +23,7 @@ roomRuntime = "2.6.1"
 runtime = "1.10.3"
 
 [libraries]
+androidx-connect-client = { module = "androidx.health.connect:connect-client", version.ref = "connectClient" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-hilt-navigation-compose-v120 = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationComposeVersion" }
