@@ -7,7 +7,6 @@ import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.dao.UsuarioDao
-import com.app.medcontrol.service.AlarmScheduler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,11 +48,6 @@ object DataBaseModule {
         return dataBase.registroConsumoDao()
     }
 
-    @Provides
-    @Singleton
-    fun provideAlarmScheduler(@ApplicationContext context: Context): AlarmScheduler {
-        return AlarmScheduler(context)
-    }
 
     @Provides
     @Singleton

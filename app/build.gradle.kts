@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.app.medcontrol"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -46,6 +46,7 @@ dependencies {
     val room_version = "2.6.1"
 
     ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.connect.client)
     implementation(libs.gson)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

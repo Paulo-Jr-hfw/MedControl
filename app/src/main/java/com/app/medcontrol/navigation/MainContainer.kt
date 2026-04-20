@@ -1,7 +1,5 @@
 package com.app.medcontrol.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -16,7 +14,7 @@ import com.app.medcontrol.screen.Paciente.PacienteHomeScreen
 import com.app.medcontrol.screen.medicamento.MedicamentoScreen
 import com.app.medcontrol.screen.sinais.SinaisScreen
 
-@RequiresApi(Build.VERSION_CODES.O)
+
 @Composable
 fun MainContainer(
     usuarioId: Int,
@@ -83,8 +81,7 @@ fun MainContainer(
                 SinaisScreen(
                     onNavigateToManual = {
                         onNavigateToGlobalRoute("${Routes.CadastroSinais.route}/$usuarioId")
-                    },
-                    onNavigateToRelogio = {}
+                    }
                 )
             }
         }

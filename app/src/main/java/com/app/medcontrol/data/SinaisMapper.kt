@@ -1,7 +1,9 @@
 package com.app.medcontrol.data
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
+import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
 import com.app.medcontrol.data.entity.SinaisEntity
 import com.app.medcontrol.model.Sinais
 import com.app.medcontrol.model.ui.SinaisUI
@@ -10,7 +12,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
+
 fun SinaisEntity.toDomain(): Sinais {
     return Sinais(
         sinaisId = this.sinaisId,
@@ -27,7 +29,7 @@ fun SinaisEntity.toDomain(): Sinais {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+
 fun Sinais.toUI(): SinaisUI{
     val formatter = DateTimeFormatter.ofPattern("d MMM yyyy 'às' HH:mm", Locale("pt", "BR"))
 
@@ -44,5 +46,25 @@ fun Sinais.toUI(): SinaisUI{
         observacoes = if (this.observacoes.isNotBlank()) this.observacoes else null
 
 
+    )
+}
+
+fun mapHealthDataToEntity(
+    usuarioId: Int,
+    batimento: HeartRateRecord?,
+    pressao: BloodPressureRecord?,
+    oxigenacao: OxygenSaturationRecord?,
+    temperatura: BodyTemperatureRecord?
+): SinaisEntity {
+    return SinaisEntity(
+        pacienteId = usuarioId,
+        dataRegistro = System.currentTimeMillis(),
+        fc = batimento?.samples?.firstOrNull()?.beatsPerMinute?.toInt() ?: 0,
+        paSistolica = pressao?.systolic?.inMillimetersOfMercury?.toInt() ?: 0,
+        paDiastolica = pressao?.diastolic?.inMillimetersOfMercury?.toInt() ?: 0,
+        spo2 = oxigenacao?.percentage?.value?.toInt() ?: 0,
+        temperatura = temperatura?.temperature?.inCelsius ?: 0.0,
+        glicose = 0.0,
+        observacoes = "Importado via Smartwatch"
     )
 }

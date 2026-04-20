@@ -1,9 +1,11 @@
 package com.app.medcontrol.screen.sinais
 
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,44 +25,73 @@ import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.components.SinaisItem
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SinaisScreen(
     viewModel: SinaisScreenViewModel = hiltViewModel(),
-    onNavigateToManual: () -> Unit,
-    onNavigateToRelogio: () -> Unit
+    onNavigateToManual: () -> Unit
 ) {
     val listaSinais by viewModel.listaSinaisUI.collectAsState()
     val mostrarBottomSheet by viewModel.mostrarBottomSheet.collectAsState()
+    val loadingRelogio by viewModel.loadingRelogio.collectAsState()
+
     val sheetState = rememberModalBottomSheetState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+
+    val launcher = rememberHealthPermissionsLauncher(
+        onSuccess = { viewModel.importarDadosRelogio() },
+        onError = {
+            scope.launch { snackbarHostState.showSnackbar("Permissão negada.") }
+        }
+    )
+
+    if (loadingRelogio) {
+        Dialog(onDismissRequest = { }) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .background(Color.White, shape = RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color(0xFFF57C00))
+            }
+        }
+    }
+
 
     LaunchedEffect(Unit){
         viewModel.uiEvent.collect { event ->
@@ -71,9 +102,7 @@ fun SinaisScreen(
                         duration = SnackbarDuration.Short
                     )
                 }
-                is SinaisUiEvent.NavegarParaRelogio -> {
-                    onNavigateToRelogio()
-                }
+                else -> {}
             }
         }
     }
@@ -111,7 +140,11 @@ fun SinaisScreen(
                     },
                     onRelogioClick = {
                         viewModel.fecharBottomSheet()
-                        onNavigateToRelogio()
+                        viewModel.verificarERegistrarSinaisPeloRelogio(
+                            onSolicitarPermissao = {
+                                launcher.launch(viewModel.healthConnectManager.permissoesNecessarias)
+                            }
+                        )
                     }
                 )
             }
@@ -215,5 +248,19 @@ fun SelecaoRegistroContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun rememberHealthPermissionsLauncher(
+    onSuccess: () -> Unit,
+    onError: () -> Unit
+) = rememberLauncherForActivityResult(
+    PermissionController.createRequestPermissionResultContract()
+) { granted ->
+    if (granted.isNotEmpty()) {
+        onSuccess()
+    } else {
+        onError()
     }
 }
