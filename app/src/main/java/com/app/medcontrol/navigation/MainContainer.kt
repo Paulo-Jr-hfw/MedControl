@@ -1,5 +1,7 @@
 package com.app.medcontrol.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -15,6 +17,7 @@ import com.app.medcontrol.screen.medicamento.MedicamentoScreen
 import com.app.medcontrol.screen.sinais.SinaisScreen
 
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun MainContainer(
     usuarioId: Int,
@@ -68,8 +71,7 @@ fun MainContainer(
                         onNavigateToGlobalRoute("${Routes.CadastroMed.route}/$usuarioId")
                     },
                     onNavigateToDetalhes = { idMed ->
-                        // usar mesma logica do cadastro de medicamento
-                        // onNavigateToGlobalRoute(Routes.Detalhes.createRoute(idMed))
+                        onNavigateToGlobalRoute("${Routes.Detalhes.route}/$idMed/$usuarioId")
                     }
                 )
             }

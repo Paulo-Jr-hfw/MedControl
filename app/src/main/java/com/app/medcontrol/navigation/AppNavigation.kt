@@ -11,9 +11,10 @@ import androidx.navigation.navArgument
 import com.app.medcontrol.screen.cadastromed.CadastroMedScreen
 import com.app.medcontrol.screen.cadastrosinais.CadastroSinaisScreen
 import com.app.medcontrol.screen.cadastrouser.CadastroUserScreen
+import com.app.medcontrol.screen.detalhemed.DetalheMedicamentoScreen
 import com.app.medcontrol.screen.login.LoginScreen
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -40,8 +41,14 @@ fun AppNavigation() {
             )
         }
 
-        composable(route = "${Routes.CadastroMed.route}/{usuarioId}",
-            arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+        composable(route = "${Routes.CadastroMed.route}/{usuarioId}?medicamentoId={medicamentoId}",
+            arguments = listOf(
+                navArgument("usuarioId") { type = NavType.IntType },
+                navArgument("medicamentoId") {
+                    type = NavType.IntType
+                    defaultValue = 0
+                }
+            )
         ) {
             CadastroMedScreen(
                 onNavigateBack = { navController.popBackStack() }
@@ -66,6 +73,20 @@ fun AppNavigation() {
                 usuarioId = idLogado,
                 onNavigateToGlobalRoute = { rotaGlobal ->
                     navController.navigate(rotaGlobal)
+                }
+            )
+        }
+        composable(
+            route = "${Routes.Detalhes.route}/{medicamentoId}/{usuarioId}",
+            arguments = listOf(navArgument("medicamentoId") { type = NavType.IntType },
+                navArgument("usuarioId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val idLogado = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+
+            DetalheMedicamentoScreen(
+                onVoltar = { navController.popBackStack() },
+                onEditar = { id ->
+                    navController.navigate("${Routes.CadastroMed.route}/$idLogado?medicamentoId=$id")
                 }
             )
         }
