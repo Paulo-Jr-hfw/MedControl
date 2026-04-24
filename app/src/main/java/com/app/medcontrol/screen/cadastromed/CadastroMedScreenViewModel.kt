@@ -169,7 +169,7 @@ class CadastroMedScreenViewModel @Inject constructor(
                         nomeMed = medicamento.nome,
                         dosagem = medicamento.dosagem,
                         instrucoes = medicamento.instrucoes ?: "",
-                        imagemUri = medicamento.imagemUri?.let { it.toUri() },
+                        imagemUri = medicamento.imagemUri?.toUri(),
                         listaHorarios = medicamento.horario
                     )
                 }
