@@ -1,13 +1,12 @@
 package com.app.medcontrol.screen.medicamento
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.entity.MedicamentoEntity
+import com.app.medcontrol.model.ui.MedicamentoUI
 import com.app.medcontrol.service.AlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -18,7 +17,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import com.app.medcontrol.model.ui.MedicamentoUI
 
 
 @HiltViewModel
@@ -33,7 +31,6 @@ class MedicamentoScreenViewModel @Inject constructor(
     private val _UiEvent = Channel<MedicamentoUiEvent>()
     val UiEvent = _UiEvent.receiveAsFlow()
 
-    @RequiresApi(Build.VERSION_CODES.O)
     val listaMedicamentosUI = medicamentoDao.getAllMedicamentosAtivosFlow(usuarioId)
         .map { lista ->
             lista.map { entity ->
@@ -56,7 +53,6 @@ class MedicamentoScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun excluirMedicamento(medicamento: MedicamentoEntity) {
         viewModelScope.launch {
             try {
