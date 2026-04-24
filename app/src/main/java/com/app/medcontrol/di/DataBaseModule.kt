@@ -3,6 +3,7 @@ package com.app.medcontrol.di
 import android.content.Context
 import androidx.room.Room
 import com.app.medcontrol.data.AppDataBase
+import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.dao.SinaisDao
@@ -53,5 +54,11 @@ object DataBaseModule {
     @Singleton
     fun provideSinaisDao(dataBase: AppDataBase) : SinaisDao {
         return dataBase.sinaisDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoricoMedicamentoDao(dataBase: AppDataBase): HistoricoMedicamentoDao {
+        return dataBase.historicoMedicamentoDao()
     }
 }
