@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 data class CadastroMedUiState(
     val nomeMed: String = "",
@@ -168,7 +169,7 @@ class CadastroMedScreenViewModel @Inject constructor(
                         nomeMed = medicamento.nome,
                         dosagem = medicamento.dosagem,
                         instrucoes = medicamento.instrucoes ?: "",
-                        imagemUri = medicamento.imagemUri?.let { Uri.parse(it) },
+                        imagemUri = medicamento.imagemUri?.let { it.toUri() },
                         listaHorarios = medicamento.horario
                     )
                 }
