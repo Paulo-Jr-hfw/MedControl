@@ -1,8 +1,6 @@
 package com.app.medcontrol.screen.cadastromed
 
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +17,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 data class CadastroMedUiState(
     val nomeMed: String = "",
     val dosagem: String = "",
@@ -33,7 +30,6 @@ data class CadastroMedUiState(
     val mostrarDialogoPermissao: Boolean = false
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class CadastroMedScreenViewModel @Inject constructor(
     private val medicamentoDao: MedicamentoDao,
@@ -41,6 +37,7 @@ class CadastroMedScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val usuarioId: Int = checkNotNull(savedStateHandle["usuarioId"])
+    private val medicamentoId: Int = savedStateHandle["medicamentoId"] ?: 0
     private val _uiState = MutableStateFlow(CadastroMedUiState())
     val uiState: StateFlow<CadastroMedUiState> = _uiState.asStateFlow()
     private val _uiEvent = Channel<UiEvent>()
@@ -120,6 +117,7 @@ class CadastroMedScreenViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val entity = MedicamentoEntity(
+                    id = medicamentoId,
                     usuarioId = usuarioId,
                     nome = currentState.nomeMed,
                     dosagem = currentState.dosagem,
@@ -159,6 +157,29 @@ class CadastroMedScreenViewModel @Inject constructor(
 
     fun fecharDialogoPermissao() {
         _uiState.update { it.copy(mostrarDialogoPermissao = false) }
+    }
+
+    fun carregarDadosMedicamento() {
+        viewModelScope.launch {
+            val medicamento = medicamentoDao.getMedicamentoById(medicamentoId)
+            if (medicamento != null) {
+                _uiState.update { state ->
+                    state.copy(
+                        nomeMed = medicamento.nome,
+                        dosagem = medicamento.dosagem,
+                        instrucoes = medicamento.instrucoes ?: "",
+                        imagemUri = medicamento.imagemUri?.let { Uri.parse(it) },
+                        listaHorarios = medicamento.horario
+                    )
+                }
+            }
+        }
+    }
+
+    init {
+        if (medicamentoId != 0) {
+            carregarDadosMedicamento()
+        }
     }
 }
 
