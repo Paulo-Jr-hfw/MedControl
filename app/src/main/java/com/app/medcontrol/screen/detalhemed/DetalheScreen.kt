@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
+import com.app.medcontrol.data.entity.MedicamentoEntity
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -59,10 +60,24 @@ fun DetalheMedicamentoScreen(
     onVoltar: () -> Unit,
     onEditar: (Int) -> Unit
 ) {
-    val medicamento by viewModel.medicamentoState.collectAsState()
-    val abaSelecionada by viewModel.abaSelecionada.collectAsState()
-    val historico by viewModel.historicoAgrupado.collectAsState()
 
+    val uiState by viewModel.uiState.collectAsState()
+
+    DetalheMedicamentoContent(
+        state = uiState,
+        onVoltar = onVoltar,
+        onEditar = onEditar,
+        onMudarAba = viewModel::mudarAba
+    )
+}
+
+@Composable
+fun DetalheMedicamentoContent(
+    state: DetalheMedicamentoUiState,
+    onVoltar: () -> Unit,
+    onEditar: (Int) -> Unit,
+    onMudarAba: (Int) -> Unit
+) {
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
@@ -70,106 +85,121 @@ fun DetalheMedicamentoScreen(
                 .padding(paddingValues)
                 .background(Color(0xFFF8F9FA))
         ) {
-            // --- CABEÇALHO COM DEGRADÊ ---
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color(0xFF4DB6AC), Color(0xFF80CBC4))
-                        )
-                    )
-                    .padding(16.dp)
-            ) {
-                // Botão Voltar
-                IconButton(
-                    onClick = onVoltar,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .background(Color.White.copy(alpha = 0.3f), shape = CircleShape)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
-                }
+            HeaderMedicamento(
+                medicamento = state.medicamento,
+                onVoltar = onVoltar,
+                onEditar = onEditar
+            )
 
-                // Info do Medicamento
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(bottom = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Imagem ou Placeholder
-                    Surface(
-                        modifier = Modifier.size(80.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color.White.copy(alpha = 0.2f),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.MedicalServices,
-                            contentDescription = null,
-                            modifier = Modifier.padding(16.dp),
-                            tint = Color.White
-                        )
-                    }
+            TabsMedicamento(
+                abaSelecionada = state.abaSelecionada,
+                onMudarAba = onMudarAba
+            )
 
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = medicamento?.nome ?: "Carregando...",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = medicamento?.dosagem ?: "",
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                    }
-
-                    // Botão Editar
-                    IconButton(
-                        onClick = { medicamento?.let { onEditar(it.id) } },
-                        modifier = Modifier
-                            .background(Color.White.copy(alpha = 0.3f), shape = CircleShape)
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = Color.White)
-                    }
+            Crossfade(targetState = state.abaSelecionada) { aba ->
+                when (aba) {
+                    0 -> DetalhesConteudo(state.medicamento)
+                    1 -> HistoricoConteudo(state.historico)
                 }
             }
+        }
+    }
+}
 
-            // --- SELETOR DE ABAS (DETALHES / HISTÓRICO) ---
-            Card(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE9ECEF))
+@Composable
+fun HeaderMedicamento(
+    medicamento: MedicamentoEntity?,
+    onVoltar: () -> Unit,
+    onEditar: (Int) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF4DB6AC), Color(0xFF80CBC4))
+                )
+            )
+            .padding(16.dp)
+    ) {
+        // Botão Voltar
+        IconButton(
+            onClick = onVoltar,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .background(Color.White.copy(alpha = 0.3f), shape = CircleShape)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+        }
+
+        // Info do Medicamento
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Imagem ou Placeholder
+            Surface(
+                modifier = Modifier.size(80.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White.copy(alpha = 0.2f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
             ) {
-                Row(modifier = Modifier.padding(4.dp)) {
-                    TabItem(
-                        titulo = "Detalhes",
-                        selecionado = abaSelecionada == 0,
-                        modifier = Modifier.weight(1f),
-                        onClick = { viewModel.mudarAba(0) }
-                    )
-                    TabItem(
-                        titulo = "Histórico",
-                        selecionado = abaSelecionada == 1,
-                        modifier = Modifier.weight(1f),
-                        onClick = { viewModel.mudarAba(1) }
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.MedicalServices,
+                    contentDescription = null,
+                    modifier = Modifier.padding(16.dp),
+                    tint = Color.White
+                )
             }
 
-            // --- CONTEÚDO DINÂMICO ---
-            Crossfade(targetState = abaSelecionada, label = "transicao_abas") { targetAba ->
-                when (targetAba) {
-                    0 -> DetalhesConteudo(medicamento)
-                    1 -> HistoricoConteudo(historico)
-                }
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = medicamento?.nome ?: "Carregando...",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = medicamento?.dosagem ?: "",
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+            }
+
+            // Botão Editar
+            IconButton(
+                onClick = { medicamento?.let { onEditar(it.id) } },
+                modifier = Modifier
+                    .background(Color.White.copy(alpha = 0.3f), shape = CircleShape)
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = "Editar", tint = Color.White)
+            }
+        }
+    }
+}
+
+@Composable
+fun TabsMedicamento(
+    abaSelecionada: Int,
+    onMudarAba: (Int) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE9ECEF))
+    ) {
+        Row (modifier = Modifier.padding(4.dp)) {
+            TabItem("Detalhes", abaSelecionada == 0, Modifier.weight(1f)) {
+                onMudarAba(0)
+            }
+            TabItem("Histórico", abaSelecionada == 1, Modifier.weight(1f)) {
+                onMudarAba(1)
             }
         }
     }
@@ -231,7 +261,9 @@ fun HistoricoConteudo(
                 ) {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Box(
-                            modifier = Modifier.size(32.dp).background(Color(0xFFE0F2F1), CircleShape),
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(0xFFE0F2F1), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Default.Check, null, tint = Color(0xFF26A69A), modifier = Modifier.size(20.dp))
@@ -254,8 +286,10 @@ fun HistoricoConteudo(
 }
 
 @Composable
-fun DetalhesConteudo(medicamento: com.app.medcontrol.data.entity.MedicamentoEntity?) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+fun DetalhesConteudo(medicamento: MedicamentoEntity?) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Card Instruções
         Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
             Column(Modifier.padding(16.dp)) {
