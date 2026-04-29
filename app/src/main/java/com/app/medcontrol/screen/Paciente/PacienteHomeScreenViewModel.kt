@@ -1,13 +1,13 @@
 package com.app.medcontrol.screen.Paciente
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.dao.UsuarioDao
+import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.StatusConsumo
 import com.app.medcontrol.service.AlarmScheduler
@@ -22,12 +22,12 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class PacienteHomeScreenViewModel @Inject constructor(
     private val usuarioDao: UsuarioDao,
     private val medicamentoDao: MedicamentoDao,
     private val registroDao: RegistroConsumoDao,
+    private val HistoricoMedicamentoDao: HistoricoMedicamentoDao,
     private val alarmScheduler: AlarmScheduler,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -51,7 +51,9 @@ class PacienteHomeScreenViewModel @Inject constructor(
                 dosagem = item.medicamento.dosagem,
                 horarioAgendado = item.registro.horarioAgendado,
                 status = item.registro.status,
-                imagemUri = item.medicamento.imagemUri
+                imagemUri = item.medicamento.imagemUri,
+                medicamentoId = item.medicamento.id,
+                usuarioId = item.medicamento.usuarioId
             )
         }
 
@@ -123,7 +125,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
         }
     }
 
-    fun marcarComoTomado(registroId: Int) {
+    fun marcarComoTomado(registroId: Int, medicamentoId: Int, usuarioId: Int) {
         viewModelScope.launch {
             try {
             registroDao.marcarComoTomado(
@@ -132,6 +134,13 @@ class PacienteHomeScreenViewModel @Inject constructor(
                 horario = LocalTime.now()
             )
                 alarmScheduler.cancelarAlarme(registroId)
+                val novoHistorico = HistoricoMedicamentoEntity(
+                    medicamento_id = medicamentoId,
+                    dataHoraPrevista = LocalDateTime.now(),
+                    dataHoraTomado = LocalDateTime.now(),
+                    usuarioId = usuarioId
+                )
+                HistoricoMedicamentoDao.saveHistoricoMedicamento(novoHistorico)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -153,5 +162,7 @@ data class DoseAgendada(
     val dosagem: String,
     val horarioAgendado: LocalTime,
     val status: StatusConsumo,
-    val imagemUri: String?
+    val imagemUri: String?,
+    val medicamentoId: Int,
+    val usuarioId: Int
 )

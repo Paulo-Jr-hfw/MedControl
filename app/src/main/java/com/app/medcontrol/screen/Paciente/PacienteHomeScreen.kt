@@ -1,7 +1,5 @@
 package com.app.medcontrol.screen.Paciente
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +35,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PacienteHomeScreen(
     viewModel: PacienteHomeScreenViewModel = hiltViewModel(),
@@ -62,14 +59,17 @@ fun PacienteHomeScreen(
         }
         secaoListaMedicamentos(
             doses = uiState.dosesPendentes,
-            onConfirmar = { registroId ->
-                viewModel.marcarComoTomado(registroId)
+            onConfirmar = { dose ->
+                viewModel.marcarComoTomado(
+                    registroId = dose.registroId,
+                    medicamentoId = dose.medicamentoId,
+                    usuarioId = dose.usuarioId
+                )
             }
         )
     }
     }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Header(nomeUsuario: String) {
     Column(
@@ -88,7 +88,6 @@ fun GreetingText(nome:String) {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DataAtualText() {
     val hoje = LocalDate.now()
@@ -151,7 +150,7 @@ fun RowButtons(
 
 fun LazyListScope.secaoListaMedicamentos(
     doses: List<DoseAgendada>,
-    onConfirmar: (Int) -> Unit
+    onConfirmar: (DoseAgendada) -> Unit
 ) {
     item {
         Text(
@@ -187,7 +186,7 @@ fun LazyListScope.secaoListaMedicamentos(
         ) { dose ->
             DoseItemHome(
                 dose = dose,
-                onCheckClick = { id -> onConfirmar(id) }
+                onCheckClick = { onConfirmar(dose) }
             )
         }
     }

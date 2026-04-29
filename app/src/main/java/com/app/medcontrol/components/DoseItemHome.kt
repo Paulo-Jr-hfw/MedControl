@@ -1,7 +1,5 @@
 package com.app.medcontrol.components
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,7 +37,6 @@ enum class CartaoStatus {
     CRITICO
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun obterStatusDose(statusNoBanco: StatusConsumo, horarioAgendado: LocalTime): CartaoStatus {
     val agora = LocalTime.now()
     if (statusNoBanco == StatusConsumo.TOMADO) return CartaoStatus.NORMAL
@@ -52,7 +49,6 @@ fun obterStatusDose(statusNoBanco: StatusConsumo, horarioAgendado: LocalTime): C
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DoseItemHome(
     dose: DoseAgendada,
