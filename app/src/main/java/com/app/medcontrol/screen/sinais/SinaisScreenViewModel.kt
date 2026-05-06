@@ -10,6 +10,7 @@ import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.mapHealthDataToEntity
 import com.app.medcontrol.data.toDomain
 import com.app.medcontrol.data.toUI
+import com.app.medcontrol.model.ui.SinaisUI
 import com.app.medcontrol.service.healthconnect.HealthConnectManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -17,7 +18,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -33,12 +35,11 @@ class SinaisScreenViewModel@Inject constructor(
     private val usuarioId: Int = checkNotNull(savedStateHandle["usuarioId"])
     private val _uiEvent = Channel<SinaisUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
+
     private val _loadingRelogio = MutableStateFlow(false)
-    val loadingRelogio = _loadingRelogio.asStateFlow()
+    private val _mostrarBottomSheet = MutableStateFlow(false)
 
-
-
-    val listaSinaisUI = sinaisDao.getAllSinais(usuarioId)
+    private val listaSinaisUI = sinaisDao.getAllSinais(usuarioId)
         .map { listaEntity ->
             listaEntity.map { entity ->
                 entity.toDomain().toUI()
@@ -50,8 +51,21 @@ class SinaisScreenViewModel@Inject constructor(
             initialValue = emptyList()
         )
 
-    private val _mostrarBottomSheet = MutableStateFlow(false)
-    val mostrarBottomSheet = _mostrarBottomSheet.asStateFlow()
+    val uiState: StateFlow<SinaisUiState> = combine(
+        listaSinaisUI,
+        _mostrarBottomSheet,
+        _loadingRelogio
+    ) { lista, sheet, loading ->
+        SinaisUiState(
+            listaSinais = lista,
+            isLoadingRelogio = loading,
+            mostrarBottomSheet = sheet
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = SinaisUiState()
+    )
 
     fun abrirBottomSheet() {
         _mostrarBottomSheet.value = true
@@ -127,9 +141,7 @@ class SinaisScreenViewModel@Inject constructor(
             HealthConnectClient.SDK_AVAILABLE -> {
                 viewModelScope.launch {
                     if (healthConnectManager.temPermissoes()) {
-                        _loadingRelogio.value = true
                         importarDadosRelogio()
-                        _loadingRelogio.value = false
                     } else {
                         onSolicitarPermissao()
                     }
@@ -151,5 +163,10 @@ class SinaisScreenViewModel@Inject constructor(
 
 sealed class  SinaisUiEvent{
     data class MostrarSnackbar(val mensagem: String) : SinaisUiEvent()
-    //data object NavegarParaRelogio : SinaisUiEvent()
 }
+
+data class SinaisUiState(
+    val listaSinais: List<SinaisUI> = emptyList(),
+    val isLoadingRelogio: Boolean = false,
+    val mostrarBottomSheet: Boolean = false
+)

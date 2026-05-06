@@ -1,8 +1,6 @@
 package com.app.medcontrol.screen.medicamento
 
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,7 +40,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.components.MedicamentoItem
 import com.app.medcontrol.data.entity.MedicamentoEntity
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicamentoScreen(
@@ -77,7 +74,7 @@ fun MedicamentoScreen(
     )
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }, // ONDE a snackbar aparece
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Meus Medicamentos",

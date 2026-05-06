@@ -32,14 +32,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -63,15 +61,9 @@ fun SinaisScreen(
     viewModel: SinaisScreenViewModel = hiltViewModel(),
     onNavigateToManual: () -> Unit
 ) {
-    val listaSinais by viewModel.listaSinaisUI.collectAsState()
-    val mostrarBottomSheet by viewModel.mostrarBottomSheet.collectAsState()
-    val loadingRelogio by viewModel.loadingRelogio.collectAsState()
-
-    val sheetState = rememberModalBottomSheetState()
+    val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
-
     val launcher = rememberHealthPermissionsLauncher(
         onSuccess = { viewModel.importarDadosRelogio() },
         onError = {
@@ -79,7 +71,42 @@ fun SinaisScreen(
         }
     )
 
-    if (loadingRelogio) {
+    SinaisContent(
+        state = uiState,
+        snackbarHostState = snackbarHostState,
+        onRegistrarClick = viewModel::abrirBottomSheet,
+        onFecharBottomSheet = viewModel::fecharBottomSheet,
+        onExcluirSinal = viewModel::excluirSinal,
+        onManualClick = {
+            viewModel.fecharBottomSheet()
+            onNavigateToManual()
+        },
+        onRelogioClick = {
+            viewModel.fecharBottomSheet()
+            viewModel.verificarERegistrarSinaisPeloRelogio(
+                onSolicitarPermissao = {
+                    launcher.launch(viewModel.healthConnectManager.permissoesNecessarias)
+                }
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SinaisContent(
+    state: SinaisUiState,
+    snackbarHostState: SnackbarHostState,
+    onRegistrarClick: () -> Unit,
+    onFecharBottomSheet: () -> Unit,
+    onExcluirSinal: (Int) -> Unit,
+    onManualClick: () -> Unit,
+    onRelogioClick: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+
+    // 1. Diálogo de Loading
+    if (state.isLoadingRelogio) {
         Dialog(onDismissRequest = { }) {
             Box(
                 modifier = Modifier
@@ -92,61 +119,49 @@ fun SinaisScreen(
         }
     }
 
-
-    LaunchedEffect(Unit){
-        viewModel.uiEvent.collect { event ->
-            when (event) {
-                is SinaisUiEvent.MostrarSnackbar -> {
-                    snackbarHostState.showSnackbar(
-                        event.mensagem,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                else -> {}
-            }
-        }
-    }
-
     Scaffold(
-        topBar = {
-            SinaisTopBar(onRegistrarClick = { viewModel.abrirBottomSheet() })
-        },
+        topBar = { SinaisTopBar(onRegistrarClick = onRegistrarClick) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFF8F9FA))
-        ) {
-            items(listaSinais) { sinal ->
-                SinaisItem(
-                    sinal = sinal,
-                    onExcluirClick = { viewModel.excluirSinal(sinal.sinaisId) }
+        if (state.listaSinais.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Nenhum Sinal registrado",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
                 )
             }
-        }
-        if (mostrarBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { viewModel.fecharBottomSheet() },
-                sheetState = sheetState,
-                containerColor = Color.White
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(Color(0xFFF8F9FA))
             ) {
-                // Conteúdo da Escolha
-                SelecaoRegistroContent(
-                    onManualClick = {
-                        viewModel.fecharBottomSheet()
-                        onNavigateToManual()
-                    },
-                    onRelogioClick = {
-                        viewModel.fecharBottomSheet()
-                        viewModel.verificarERegistrarSinaisPeloRelogio(
-                            onSolicitarPermissao = {
-                                launcher.launch(viewModel.healthConnectManager.permissoesNecessarias)
-                            }
-                        )
-                    }
-                )
+                items(state.listaSinais) { sinal ->
+                    SinaisItem(
+                        sinal = sinal,
+                        onExcluirClick = { onExcluirSinal(sinal.sinaisId) }
+                    )
+                }
+            }
+
+            if (state.mostrarBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = onFecharBottomSheet,
+                    sheetState = sheetState,
+                    containerColor = Color.White
+                ) {
+                    SelecaoRegistroContent(
+                        onManualClick = onManualClick,
+                        onRelogioClick = onRelogioClick
+                    )
+                }
             }
         }
     }
