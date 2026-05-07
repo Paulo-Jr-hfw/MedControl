@@ -2,6 +2,8 @@ package com.app.medcontrol.data
 
 import androidx.room.TypeConverter
 import com.app.medcontrol.data.entity.StatusConsumo
+import com.app.medcontrol.data.entity.StatusEvento
+import com.app.medcontrol.data.entity.TipoEvento
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -40,6 +42,18 @@ class Converters {
 
     @TypeConverter
     fun toStatus(value: String): StatusConsumo = StatusConsumo.valueOf(value)
+
+    @TypeConverter
+    fun fromLogStatus(value: StatusEvento): String = value.name
+
+    @TypeConverter
+    fun toLogStatus(value: String): StatusEvento = StatusEvento.valueOf(value)
+
+    @TypeConverter
+    fun fromTipoEvento(value: TipoEvento): String = value.name
+
+    @TypeConverter
+    fun toTipoEvento(value: String): TipoEvento = TipoEvento.valueOf(value)
 
     @TypeConverter
     fun fromLocalDateTime(value: LocalDateTime?): String? {
