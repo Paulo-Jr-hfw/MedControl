@@ -6,11 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
+import com.app.medcontrol.data.dao.LogGeralDao
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.dao.UsuarioDao
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
+import com.app.medcontrol.data.entity.LogGeralEntity
 import com.app.medcontrol.data.entity.MedicamentoEntity
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.SinaisEntity
@@ -21,8 +23,9 @@ import com.app.medcontrol.data.entity.UsuarioEntity
     UsuarioEntity::class,
     RegistroConsumoEntity::class,
     HistoricoMedicamentoEntity::class,
-    SinaisEntity::class],
-    version = 10, exportSchema = false)
+    SinaisEntity::class,
+    LogGeralEntity::class],
+    version = 11, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun medicamentoDao(): MedicamentoDao
@@ -32,6 +35,8 @@ abstract class AppDataBase: RoomDatabase() {
     abstract fun sinaisDao(): SinaisDao
 
     abstract fun historicoMedicamentoDao(): HistoricoMedicamentoDao
+
+    abstract fun logGeralDao(): LogGeralDao
 
     companion object {
         @Volatile
