@@ -14,7 +14,6 @@ import java.time.ZoneId
 class AlarmScheduler( private val context: Context) {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ScheduleExactAlarm")
     fun agendarAlarme(registroId: Int, horarioAgendado: LocalDateTime, nomeMed: String) {
         val intent = Intent(context, AlarmReceiver::class.java).apply {

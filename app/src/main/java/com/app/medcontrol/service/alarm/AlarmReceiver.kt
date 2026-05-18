@@ -9,8 +9,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.app.medcontrol.MainActivity
+import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
+import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
+import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.StatusConsumo
+import com.app.medcontrol.data.entity.StatusEvento
+import com.app.medcontrol.data.entity.TipoEvento
+import com.app.medcontrol.repository.LogRepository
 import com.app.medcontrol.service.AlarmScheduler
 import com.app.medcontrol.service.notification.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,9 +33,18 @@ class AlarmReceiver : BroadcastReceiver() {
     lateinit var registroDao: RegistroConsumoDao
 
     @Inject
+    lateinit var medicamentoDao: MedicamentoDao
+
+    @Inject
     lateinit var alarmScheduler: AlarmScheduler
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @Inject
+    lateinit var logRepository: LogRepository
+
+    @Inject
+    lateinit var historicoMedicamentoDao: HistoricoMedicamentoDao
+
+
     override fun onReceive(context: Context, intent: Intent) {
         val medicamentoNome = intent.getStringExtra("MED_NOME") ?: "Medicamento"
         val registroId = intent.getIntExtra("REGISTRO_ID", 0)
@@ -39,46 +54,74 @@ class AlarmReceiver : BroadcastReceiver() {
             try {
                 if (registroId != 0) {
                     val registroAtual = registroDao.getRegistroById(registroId)
+
                     if (registroAtual.status != StatusConsumo.TOMADO) {
+                        val dataHoraOriginal = LocalDateTime.of(registroAtual.dataAgendada, registroAtual.horarioAgendado)
+                        val agora = LocalDateTime.now()
 
-                        // Atualiza para ATRASADO (se ainda não estiver)
-                        registroDao.atualizarStatus(registroId, StatusConsumo.ATRASADO)
+                        if (!agora.isBefore(dataHoraOriginal)) {
+                            val horasDeAtraso = java.time.Duration.between(dataHoraOriginal, agora).toHours()
 
-                        // 3. REAGENDAMENTO: Programa o próximo toque para daqui a 1 hora
-                        val proximoToque = LocalDateTime.now().plusHours(1)
-                        alarmScheduler.agendarAlarme(
-                            registroId = registroId,
-                            horarioAgendado = proximoToque,
-                            nomeMed = medicamentoNome
-                        )
+                            if (horasDeAtraso >= 9) {
+                                registroDao.atualizarStatus(registroId, StatusConsumo.ESQUECIDO)
 
-                        val notificationManager =
-                            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        val activityIntent = Intent(context, MainActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                val med = medicamentoDao.getMedicamentoById(registroAtual.medicamentoId)
+                                val idDoDono = med?.usuarioId ?: 0
+
+                                val historicoEsquecido = HistoricoMedicamentoEntity(
+                                    medicamento_id = registroAtual.medicamentoId,
+                                    dataHoraPrevista = dataHoraOriginal,
+                                    dataHoraTomado = null,
+                                    usuarioId = idDoDono
+                                )
+                                historicoMedicamentoDao.saveHistoricoMedicamento(historicoEsquecido)
+
+                                logRepository.registrarAcao(
+                                    usuarioId = idDoDono,
+                                    tipo = TipoEvento.MEDICAMENTO,
+                                    titulo = medicamentoNome,
+                                    descricao = "Dose das ${registroAtual.horarioAgendado} esquecida (limite de 9h excedido).",
+                                    status = StatusEvento.ALERTA
+                                )
+                            } else {
+                                if (horasDeAtraso >= 1) {
+                                    registroDao.atualizarStatus(registroId, StatusConsumo.ATRASADO)
+                                }
+
+                                val proximoToque = LocalDateTime.now().plusHours(1)
+                                alarmScheduler.agendarAlarme(
+                                    registroId = registroId,
+                                    horarioAgendado = proximoToque,
+                                    nomeMed = medicamentoNome
+                                )
+
+                                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                                val activityIntent = Intent(context, MainActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                }
+
+                                val pendingIntent = PendingIntent.getActivity(
+                                    context,
+                                    registroId,
+                                    activityIntent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                                )
+
+                                val builder = NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID)
+                                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                                    .setContentTitle("Hora de tomar seu remédio!")
+                                    .setContentText("Está na hora do: $medicamentoNome")
+                                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                                    .setCategory(NotificationCompat.CATEGORY_ALARM)
+                                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+                                    .setFullScreenIntent(pendingIntent, true)
+                                    .setAutoCancel(true)
+                                    .setContentIntent(pendingIntent)
+
+                                notificationManager.notify(registroId, builder.build())
+                            }
                         }
-
-                        val pendingIntent = PendingIntent.getActivity(
-                            context,
-                            registroId,
-                            activityIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                        )
-
-                        val builder =
-                            NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID)
-                                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                                .setContentTitle("Hora de tomar seu remédio!")
-                                .setContentText("Está na hora do: $medicamentoNome")
-                                .setPriority(NotificationCompat.PRIORITY_MAX)
-                                .setCategory(NotificationCompat.CATEGORY_ALARM)
-                                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                                .setFullScreenIntent(pendingIntent, true)
-                                .setAutoCancel(true)
-                                .setContentIntent(pendingIntent)
-
-                        notificationManager.notify(registroId, builder.build())
                     }
                 }
             } catch (e: Exception) {

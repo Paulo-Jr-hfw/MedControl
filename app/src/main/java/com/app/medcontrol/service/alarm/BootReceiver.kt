@@ -24,7 +24,6 @@ class BootReceiver : BroadcastReceiver() {
     @Inject
     lateinit var registroDao: com.app.medcontrol.data.dao.RegistroConsumoDao
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             // Como é um processo de banco, usamos uma Coroutine
