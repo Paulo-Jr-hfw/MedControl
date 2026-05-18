@@ -1,6 +1,7 @@
 package com.app.medcontrol.screen.cadastromed
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
-import androidx.core.net.toUri
 
 data class CadastroMedUiState(
     val nomeMed: String = "",

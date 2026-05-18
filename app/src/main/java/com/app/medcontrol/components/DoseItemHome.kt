@@ -41,11 +41,18 @@ fun obterStatusDose(statusNoBanco: StatusConsumo, horarioAgendado: LocalTime): C
     val agora = LocalTime.now()
     if (statusNoBanco == StatusConsumo.TOMADO) return CartaoStatus.NORMAL
 
-    return when {
-        statusNoBanco == StatusConsumo.TOMADO -> CartaoStatus.NORMAL
-        horarioAgendado.isBefore(agora.minusHours(8)) -> CartaoStatus.CRITICO
-        horarioAgendado.isBefore(agora) -> CartaoStatus.ATRASADO
-        else -> CartaoStatus.NORMAL
+    return when (statusNoBanco) {
+        StatusConsumo.TOMADO -> CartaoStatus.NORMAL
+        StatusConsumo.ESQUECIDO -> CartaoStatus.CRITICO
+        StatusConsumo.ATRASADO -> CartaoStatus.ATRASADO
+        StatusConsumo.PENDENTE -> {
+            
+            if (agora.isAfter(horarioAgendado.plusHours(1))) {
+                CartaoStatus.ATRASADO
+            } else {
+                CartaoStatus.NORMAL
+            }
+        }
     }
 }
 
@@ -56,7 +63,6 @@ fun DoseItemHome(
 ) {
     val status = obterStatusDose(dose.status, dose.horarioAgendado)
 
-    // Define a cor baseada no status
     val containerColor = when (status) {
         CartaoStatus.CRITICO -> Color(0xFFFFEBEE) // Vermelho bem claro
         CartaoStatus.ATRASADO -> Color(0xFFFFF9C4) // Amarelo claro

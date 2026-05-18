@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.app.medcontrol.model.ui.MedicamentoUI
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MedicamentoItem(
     medicamento: MedicamentoUI,
