@@ -3,8 +3,6 @@ package com.app.medcontrol.service.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.app.medcontrol.data.entity.StatusConsumo
 import com.app.medcontrol.service.AlarmScheduler
 import dagger.hilt.android.AndroidEntryPoint
