@@ -253,6 +253,8 @@ fun HistoricoConteudo(
             }
 
             items(historicoAgrupado[data] ?: emptyList()) { registro ->
+                val ehEsquecido = registro.dataHoraTomado == null
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -271,13 +273,21 @@ fun HistoricoConteudo(
                         Spacer(Modifier.width(16.dp))
 
                         val horaPrevista = registro.dataHoraPrevista.format(DateTimeFormatter.ofPattern("HH:mm"))
-                        val horaTomada = registro.dataHoraTomado?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "--:--"
-
-                        Text(
-                            text = "Previsto: $horaPrevista • Tomado: $horaTomada",
-                            color = Color(0xFF78909C),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        if (ehEsquecido) {
+                            Text(
+                                text = "Previsto: $horaPrevista • Não tomado (Esquecido)",
+                                color = Color(0xFFEF5350),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        } else {
+                            val horaTomada = registro.dataHoraTomado!!.format(DateTimeFormatter.ofPattern("HH:mm"))
+                            Text(
+                                text = "Previsto: $horaPrevista • Tomado: $horaTomada",
+                                color = Color(0xFF78909C),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
             }

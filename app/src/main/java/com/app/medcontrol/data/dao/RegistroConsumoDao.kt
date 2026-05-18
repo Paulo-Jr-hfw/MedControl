@@ -75,11 +75,9 @@ interface RegistroConsumoDao {
 """)
     suspend fun cancelarDosesPendentesPorData(medId: Int, data: LocalDate)
 
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun cancelarDosesPendentesHoje(medId: Int) =
         cancelarDosesPendentesPorData(medId, LocalDate.now())
 
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getRegistrosPorMedicamentoHoje(medId: Int) =
         getRegistrosPorMedicamentoEData(medId, LocalDate.now())
 

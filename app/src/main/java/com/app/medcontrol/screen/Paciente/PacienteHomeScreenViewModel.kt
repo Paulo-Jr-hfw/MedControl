@@ -3,7 +3,6 @@ package com.app.medcontrol.screen.Paciente
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.medcontrol.components.CartaoStatus
 import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
