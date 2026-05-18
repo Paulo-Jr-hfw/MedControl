@@ -3,6 +3,7 @@ package com.app.medcontrol.screen.Paciente
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.medcontrol.components.CartaoStatus
 import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
@@ -10,6 +11,9 @@ import com.app.medcontrol.data.dao.UsuarioDao
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.StatusConsumo
+import com.app.medcontrol.data.entity.StatusEvento
+import com.app.medcontrol.data.entity.TipoEvento
+import com.app.medcontrol.repository.LogRepository
 import com.app.medcontrol.service.AlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +33,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
     private val registroDao: RegistroConsumoDao,
     private val HistoricoMedicamentoDao: HistoricoMedicamentoDao,
     private val alarmScheduler: AlarmScheduler,
+    private val logRepository: LogRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -128,22 +133,70 @@ class PacienteHomeScreenViewModel @Inject constructor(
     fun marcarComoTomado(registroId: Int, medicamentoId: Int, usuarioId: Int) {
         viewModelScope.launch {
             try {
-            registroDao.marcarComoTomado(
-                registroId = registroId,
-                novoStatus = StatusConsumo.TOMADO,
-                horario = LocalTime.now()
-            )
-                alarmScheduler.cancelarAlarme(registroId)
-                val novoHistorico = HistoricoMedicamentoEntity(
-                    medicamento_id = medicamentoId,
-                    dataHoraPrevista = LocalDateTime.now(),
-                    dataHoraTomado = LocalDateTime.now(),
-                    usuarioId = usuarioId
-                )
-                HistoricoMedicamentoDao.saveHistoricoMedicamento(novoHistorico)
+                val registro = registroDao.getRegistroById(registroId)
+                val med = medicamentoDao.getMedicamentoById(medicamentoId)
+                val agora = LocalDateTime.now()
+
+                registro?.let { reg ->
+
+                    registroDao.marcarComoTomado(
+                        registroId = registroId,
+                        novoStatus = StatusConsumo.TOMADO,
+                        horario = agora.toLocalTime()
+                    )
+
+                    alarmScheduler.cancelarAlarme(registroId)
+
+                    val dataHoraPrevistaReal = reg.horarioAgendado.atDate(LocalDate.now())
+
+                    val novoHistorico = HistoricoMedicamentoEntity(
+                        medicamento_id = medicamentoId,
+                        dataHoraPrevista = dataHoraPrevistaReal,
+                        dataHoraTomado = agora,
+                        usuarioId = usuarioId
+                    )
+                    HistoricoMedicamentoDao.saveHistoricoMedicamento(novoHistorico)
+
+                    salvarLogMedicamento(
+                        usuarioId = usuarioId,
+                        nomeMed = med?.nome ?: "Medicamento",
+                        horarioAgendado = reg.horarioAgendado,
+                        horarioReal = agora.toLocalTime()
+                    )
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    private suspend fun salvarLogMedicamento(
+        usuarioId: Int,
+        nomeMed: String,
+        horarioAgendado: LocalTime,
+        horarioReal: LocalTime
+    ) {
+        val formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+        val status = calcularStatusLog(horarioAgendado, horarioReal)
+        val descricao = "Agendado: ${horarioAgendado.format(formatter)} • Tomado: ${horarioReal.format(formatter)}"
+
+        logRepository.registrarAcao(
+            usuarioId = usuarioId,
+            tipo = TipoEvento.MEDICAMENTO,
+            titulo = nomeMed,
+            descricao = descricao,
+            status = status
+        )
+    }
+    private fun calcularStatusLog(
+        horarioAgendado: LocalTime,
+        horarioReal: LocalTime
+    ): StatusEvento {
+        return when {
+            horarioReal.isAfter(horarioAgendado.plusHours(8)) -> StatusEvento.ALERTA
+            horarioReal.isAfter(horarioAgendado.plusHours(1)) -> StatusEvento.ATRASADO
+            else -> StatusEvento.SUCESSO
         }
     }
 }

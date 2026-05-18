@@ -83,4 +83,11 @@ interface RegistroConsumoDao {
     suspend fun getRegistrosPorMedicamentoHoje(medId: Int) =
         getRegistrosPorMedicamentoEData(medId, LocalDate.now())
 
+    @Query ( """
+        UPDATE registros_consumo 
+        SET status = 'ESQUECIDO' 
+        WHERE status = 'PENDENTE' AND id = :registroId
+    """)
+        suspend fun marcarComoEsquecido (registroId: Int)
+
 }
