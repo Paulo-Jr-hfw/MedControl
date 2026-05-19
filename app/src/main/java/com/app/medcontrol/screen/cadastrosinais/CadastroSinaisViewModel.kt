@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.entity.SinaisEntity
+import com.app.medcontrol.repository.LogRepository
 import com.app.medcontrol.screen.cadastromed.CadastroMedScreenViewModel.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CadastroSinaisViewModel @Inject constructor(
     private val sinaisDao: SinaisDao,
+    private val logRepository: LogRepository,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
     private val usuarioId: Int = checkNotNull(savedStateHandle["usuarioId"])
@@ -72,6 +74,16 @@ class CadastroSinaisViewModel @Inject constructor(
                 pacienteId = usuarioId
             )
             sinaisDao.insertSinais(entity)
+                logRepository.registrarLogSinais(
+                    usuarioId = usuarioId,
+                    fc = entity.fc,
+                    paSistolica = entity.paSistolica,
+                    paDiastolica = entity.paDiastolica,
+                    spo2 = entity.spo2,
+                    glicose = entity.glicose,
+                    temperatura = entity.temperatura
+                )
+
                 _uiEvent.send(UiEvent.CadastroSucesso)
                 _uiState.update { CadastroSinaisUiState() }}
             catch (e: Exception){
