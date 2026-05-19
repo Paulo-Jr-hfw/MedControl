@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.entity.SinaisEntity
 import com.app.medcontrol.repository.LogRepository
-import com.app.medcontrol.screen.cadastromed.CadastroMedScreenViewModel.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
