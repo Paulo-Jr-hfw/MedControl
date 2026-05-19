@@ -11,6 +11,7 @@ import com.app.medcontrol.data.mapHealthDataToEntity
 import com.app.medcontrol.data.toDomain
 import com.app.medcontrol.data.toUI
 import com.app.medcontrol.model.ui.SinaisUI
+import com.app.medcontrol.repository.LogRepository
 import com.app.medcontrol.service.healthconnect.HealthConnectManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -29,6 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SinaisScreenViewModel@Inject constructor(
     private val sinaisDao: SinaisDao,
+    private val logRepository: LogRepository,
     val healthConnectManager: HealthConnectManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -120,6 +122,16 @@ class SinaisScreenViewModel@Inject constructor(
                         )
 
                         sinaisDao.insertSinais(novoSinal)
+
+                        logRepository.registrarLogSinais(
+                            usuarioId = usuarioId,
+                            fc = novoSinal.fc,
+                            paSistolica = novoSinal.paSistolica,
+                            paDiastolica = novoSinal.paDiastolica,
+                            spo2 = novoSinal.spo2,
+                            glicose = novoSinal.glicose,
+                            temperatura = novoSinal.temperatura
+                        )
 
                         _uiEvent.send(SinaisUiEvent.MostrarSnackbar("Sinais salvos automaticamente!"))
                     }
