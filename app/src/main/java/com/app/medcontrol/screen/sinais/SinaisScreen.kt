@@ -105,7 +105,6 @@ fun SinaisContent(
 ) {
     val sheetState = rememberModalBottomSheetState()
 
-    // 1. Diálogo de Loading
     if (state.isLoadingRelogio) {
         Dialog(onDismissRequest = { }) {
             Box(
@@ -150,18 +149,17 @@ fun SinaisContent(
                     )
                 }
             }
-
-            if (state.mostrarBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = onFecharBottomSheet,
-                    sheetState = sheetState,
-                    containerColor = Color.White
-                ) {
-                    SelecaoRegistroContent(
-                        onManualClick = onManualClick,
-                        onRelogioClick = onRelogioClick
-                    )
-                }
+        }
+        if (state.mostrarBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = onFecharBottomSheet,
+                sheetState = sheetState,
+                containerColor = Color.White
+            ) {
+                SelecaoRegistroContent(
+                    onManualClick = onManualClick,
+                    onRelogioClick = onRelogioClick
+                )
             }
         }
     }
