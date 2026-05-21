@@ -3,6 +3,7 @@ package com.app.medcontrol.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -18,6 +19,8 @@ sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: 
     object Home : BottomNavItem("Home", Icons.Default.Home, "home_screen")
     object Meds : BottomNavItem("Remédios", Icons.AutoMirrored.Filled.List, "medicamentos")
     object Sinais : BottomNavItem("Sinais", Icons.Default.Favorite, "sinais")
+
+    object Historico : BottomNavItem("Histórico", Icons.Default.History, "historico")
 }
 
 @Composable
@@ -25,7 +28,8 @@ fun NavigationMenu(navController: NavController, usuarioId: Int) {
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Meds,
-        BottomNavItem.Sinais
+        BottomNavItem.Sinais,
+        BottomNavItem.Historico
     )
 
     NavigationBar {

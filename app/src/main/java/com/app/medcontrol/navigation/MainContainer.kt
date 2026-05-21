@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.app.medcontrol.components.NavigationMenu
 import com.app.medcontrol.screen.Paciente.PacienteHomeScreen
+import com.app.medcontrol.screen.historico.LogGeralScreen
 import com.app.medcontrol.screen.medicamento.MedicamentoScreen
 import com.app.medcontrol.screen.sinais.SinaisScreen
 
@@ -84,6 +85,15 @@ fun MainContainer(
                     onNavigateToManual = {
                         onNavigateToGlobalRoute("${Routes.CadastroSinais.route}/$usuarioId")
                     }
+                )
+            }
+
+            composable(
+                route = "${Routes.Historico.route}$queryArg",
+                arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+            ) {
+                LogGeralScreen(
+                    onVoltar = { internalNavController.popBackStack() }
                 )
             }
         }
