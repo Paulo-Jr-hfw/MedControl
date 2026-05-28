@@ -38,21 +38,11 @@ enum class CartaoStatus {
 }
 
 fun obterStatusDose(statusNoBanco: StatusConsumo, horarioAgendado: LocalTime): CartaoStatus {
-    val agora = LocalTime.now()
-    if (statusNoBanco == StatusConsumo.TOMADO) return CartaoStatus.NORMAL
-
     return when (statusNoBanco) {
         StatusConsumo.TOMADO -> CartaoStatus.NORMAL
-        StatusConsumo.ESQUECIDO -> CartaoStatus.CRITICO
+        StatusConsumo.PENDENTE -> CartaoStatus.NORMAL
         StatusConsumo.ATRASADO -> CartaoStatus.ATRASADO
-        StatusConsumo.PENDENTE -> {
-            
-            if (agora.isAfter(horarioAgendado.plusHours(1))) {
-                CartaoStatus.ATRASADO
-            } else {
-                CartaoStatus.NORMAL
-            }
-        }
+        StatusConsumo.ESQUECIDO -> CartaoStatus.CRITICO
     }
 }
 

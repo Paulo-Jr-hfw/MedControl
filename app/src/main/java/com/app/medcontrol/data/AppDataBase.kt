@@ -25,7 +25,7 @@ import com.app.medcontrol.data.entity.UsuarioEntity
     HistoricoMedicamentoEntity::class,
     SinaisEntity::class,
     LogGeralEntity::class],
-    version = 11, exportSchema = false)
+    version = 16, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun medicamentoDao(): MedicamentoDao

@@ -24,7 +24,7 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            // Como é um processo de banco, usamos uma Coroutine
+
             val pendingResult = goAsync()
             val scope = CoroutineScope(Dispatchers.IO)
             scope.launch {
@@ -49,6 +49,14 @@ class BootReceiver : BroadcastReceiver() {
                         } else {
                             if (registro.status == StatusConsumo.PENDENTE) {
                                 idsParaMarcarComoAtrasado.add(registro.id)
+                            }
+                            if (registro.status == StatusConsumo.PENDENTE || registro.status == StatusConsumo.ATRASADO) {
+                                val proximoToqueAtrasado = LocalDateTime.now().plusHours(1)
+                                alarmScheduler.agendarAlarme(
+                                    registroId = registro.id,
+                                    horarioAgendado = proximoToqueAtrasado,
+                                    nomeMed = medicamento.nome
+                                )
                             }
                         }
                     }

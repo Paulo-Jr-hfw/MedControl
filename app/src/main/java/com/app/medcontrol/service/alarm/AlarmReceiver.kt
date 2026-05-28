@@ -48,17 +48,20 @@ class AlarmReceiver : BroadcastReceiver() {
         val registroId = intent.getIntExtra("REGISTRO_ID", 0)
         val pendingResult = goAsync()
 
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 if (registroId != 0) {
                     val registroAtual = registroDao.getRegistroById(registroId)
 
-                    if (registroAtual.status != StatusConsumo.TOMADO) {
+                    if (registroAtual.status == StatusConsumo.PENDENTE || registroAtual.status == StatusConsumo.ATRASADO) {
                         val dataHoraOriginal = LocalDateTime.of(registroAtual.dataAgendada, registroAtual.horarioAgendado)
                         val agora = LocalDateTime.now()
 
                         if (!agora.isBefore(dataHoraOriginal)) {
                             val horasDeAtraso = java.time.Duration.between(dataHoraOriginal, agora).toHours()
+
 
                             if (horasDeAtraso >= 9) {
                                 registroDao.atualizarStatus(registroId, StatusConsumo.ESQUECIDO)
@@ -81,8 +84,19 @@ class AlarmReceiver : BroadcastReceiver() {
                                     descricao = "Dose das ${registroAtual.horarioAgendado} esquecida (limite de 9h excedido).",
                                     status = StatusEvento.ALERTA
                                 )
+
+                                notificationManager.cancel(registroId)
+
+                                val dataHoraAmanha = dataHoraOriginal.plusDays(1)
+                                alarmScheduler.agendarAlarme(
+                                    registroId = registroId,
+                                    horarioAgendado = dataHoraAmanha,
+                                    nomeMed = medicamentoNome
+                                )
+
+
                             } else {
-                                if (horasDeAtraso >= 1) {
+                                if (registroAtual.status == StatusConsumo.PENDENTE && horasDeAtraso >= 1) {
                                     registroDao.atualizarStatus(registroId, StatusConsumo.ATRASADO)
                                 }
 
