@@ -1,11 +1,20 @@
 package com.app.medcontrol.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -13,22 +22,24 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.app.medcontrol.R
 import com.app.medcontrol.data.entity.StatusConsumo
 import com.app.medcontrol.screen.Paciente.DoseAgendada
-import java.time.LocalTime
+import com.app.medcontrol.ui.theme.AmberSignal
+import com.app.medcontrol.ui.theme.CoralSignal
 
 
 enum class CartaoStatus {
@@ -37,7 +48,7 @@ enum class CartaoStatus {
     CRITICO
 }
 
-fun obterStatusDose(statusNoBanco: StatusConsumo, horarioAgendado: LocalTime): CartaoStatus {
+fun obterStatusDose(statusNoBanco: StatusConsumo): CartaoStatus {
     return when (statusNoBanco) {
         StatusConsumo.TOMADO -> CartaoStatus.NORMAL
         StatusConsumo.PENDENTE -> CartaoStatus.NORMAL
@@ -49,82 +60,110 @@ fun obterStatusDose(statusNoBanco: StatusConsumo, horarioAgendado: LocalTime): C
 @Composable
 fun DoseItemHome(
     dose: DoseAgendada,
-    onCheckClick: (Int) -> Unit
+    onCheckClick: () -> Unit
 ) {
-    val status = obterStatusDose(dose.status, dose.horarioAgendado)
+    val status = obterStatusDose(dose.status)
 
-    val containerColor = when (status) {
-        CartaoStatus.CRITICO -> Color(0xFFFFEBEE) // Vermelho bem claro
-        CartaoStatus.ATRASADO -> Color(0xFFFFF9C4) // Amarelo claro
-        CartaoStatus.NORMAL -> MaterialTheme.colorScheme.surfaceVariant
-    }
-
-    val contentColor = when (status) {
-        CartaoStatus.CRITICO -> Color(0xFFB71C1C) // Texto Vermelho escuro
-        CartaoStatus.ATRASADO -> Color(0xFFF57F17) // Texto Laranja/Amarelo escuro
-        CartaoStatus.NORMAL -> MaterialTheme.colorScheme.onSurfaceVariant
+    val statusColor = when (status) {
+        CartaoStatus.CRITICO -> CoralSignal
+        CartaoStatus.ATRASADO -> AmberSignal
+        CartaoStatus.NORMAL -> Color.Transparent
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        shape = RoundedCornerShape(16.dp)
+            .padding(vertical = 6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.55f) // Casamento perfeito com a Progress Bar
+        ),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f))
     ) {
+
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Foto do medicamento (Se houver)
-            Card(
-                modifier = Modifier.size(60.dp),
-                shape = RoundedCornerShape(8.dp)
+
+
+            if (status != CartaoStatus.NORMAL) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(6.dp)
+                        .background(
+                            color = statusColor,
+                            shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)
+                        )
+                )
+            } else {
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 16.dp, horizontal = 12.dp)
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+
                 AsyncImage(
                     model = dose.imagemUri,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.ic_launcher_foreground), // Adicione um placeholder
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
-            ) {
-                Text(
-                    text = dose.nomeMedicamento,
-                    fontWeight = FontWeight.Bold,
-                    color = contentColor
-                )
-                Text(
-                    text = "${dose.horarioAgendado} • ${dose.dosagem}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = contentColor
+                    placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
                 )
 
-                if (status != CartaoStatus.NORMAL) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
-                        text = if (status == CartaoStatus.CRITICO) "MUITO ATRASADO" else "ATRASADO",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = contentColor
+                        text = dose.nomeMedicamento,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = dose.horarioAgendado.toString(),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (status != CartaoStatus.NORMAL) statusColor else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "•  ${dose.dosagem}",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = onCheckClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Confirmar dose",
+                        tint = if (status != CartaoStatus.NORMAL) statusColor else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                        modifier = Modifier.size(32.dp)
                     )
                 }
-            }
-
-            IconButton(
-                onClick = { onCheckClick(dose.registroId) },
-                colors = IconButtonDefaults.iconButtonColors(contentColor = contentColor)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Confirmar dose",
-                    modifier = Modifier.size(32.dp)
-                )
             }
         }
     }
