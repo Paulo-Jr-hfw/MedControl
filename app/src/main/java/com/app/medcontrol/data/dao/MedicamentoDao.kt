@@ -13,14 +13,8 @@ interface MedicamentoDao {
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun saveMedicamento(medicamento: MedicamentoEntity)
 
-    @Query("SELECT * FROM medicamentos ORDER BY nome ASC")
-    fun getAllMedicamentos(): Flow<List<MedicamentoEntity>>
-
     @Query("SELECT * FROM medicamentos WHERE id = :id")
     suspend fun getMedicamentoById(id: Int): MedicamentoEntity?
-
-    @Query("DELETE FROM medicamentos WHERE id = :id")
-    suspend fun deleteById(id: Int)
 
     @Query("SELECT * FROM medicamentos WHERE usuarioId = :usuarioId")
     suspend fun getMedicamentosByUsuarioIdList(usuarioId: Int): List<MedicamentoEntity>
