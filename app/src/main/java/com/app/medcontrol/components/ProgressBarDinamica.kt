@@ -41,11 +41,11 @@ fun ProgressBarDinamica(total: Int, tomadas: Int) {
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.55f) // Reduzido para 55% para transparecer mais o fundo!
+            containerColor = Color.White.copy(alpha = 0.55f)
         ),
         shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // Garante que nenhuma sombra estrague o vidro
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)) // Borda ligeiramente mais nítida para marcar o vidro
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f))
     ) {
         Row(
             modifier = Modifier
@@ -54,7 +54,7 @@ fun ProgressBarDinamica(total: Int, tomadas: Int) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Bloco da Esquerda: Dados de peso variável
+
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "Progresso de hoje",
@@ -63,7 +63,7 @@ fun ProgressBarDinamica(total: Int, tomadas: Int) {
                     fontWeight = FontWeight.Medium
                 )
 
-                // Texto imponente: "04 / 10 concluídos"
+
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(
@@ -85,18 +85,18 @@ fun ProgressBarDinamica(total: Int, tomadas: Int) {
                 )
             }
 
-            // Bloco da Direita: Anel de Progresso Circular
+
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(80.dp)
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    // 1. O trilho de fundo do anel (vazio)
+
                     drawCircle(
                         color = TealTrack,
                         style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
                     )
-                    // 2. O arco preenchido com o progresso real (Inicia no topo: -90 graus)
+
                     drawArc(
                         color = MedicalTeal,
                         startAngle = -90f,
@@ -106,7 +106,7 @@ fun ProgressBarDinamica(total: Int, tomadas: Int) {
                     )
                 }
 
-                // Percentagem sutil no centro do anel
+
                 val percentagem = if (total > 0) (progresso * 100).toInt() else 0
                 Text(
                     text = "$percentagem%",

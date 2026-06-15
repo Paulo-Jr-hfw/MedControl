@@ -70,10 +70,10 @@ fun PacienteHomeScreen(
                 start = 16.dp,
                 end = 16.dp,
                 top = 16.dp,
-                bottom = 120.dp
+                bottom = 0.dp
             ),
 
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item { Header(nomeUsuario = uiState.nomeUser) }
             item {
@@ -140,7 +140,7 @@ fun RowButtons(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Botão Remédios Premium
+
         Card(
             onClick = onNavigateToCadastroMed,
             modifier = Modifier.weight(1f),
@@ -171,7 +171,6 @@ fun RowButtons(
             }
         }
 
-        // Botão Sinais Premium
         Card(
             onClick = onNavigateToCadastroSinais,
             modifier = Modifier.weight(1f),

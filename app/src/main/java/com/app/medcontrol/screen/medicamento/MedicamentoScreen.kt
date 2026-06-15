@@ -49,7 +49,8 @@ fun MedicamentoScreen(
 ) {
     val medicamentos by viewModel.listaMedicamentosUI.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    var medicamentoParaExcluir by remember { mutableStateOf<MedicamentoEntity?>(null) }
+    var medicamentoIdParaExcluir by remember { mutableStateOf<Int?>(null) }
+    var medicamentoNomeParaExcluir by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.UiEvent.collect { event ->
@@ -65,21 +66,31 @@ fun MedicamentoScreen(
     }
 
     DialogConfirmarExclusao(
-        medicamento = medicamentoParaExcluir,
+        medicamentoNome = medicamentoNomeParaExcluir,
         onConfirmar = {
-            medicamentoParaExcluir?.let { viewModel.excluirMedicamento(it) }
-            medicamentoParaExcluir = null // Fecha o dialog ao limpar o estado
+            medicamentoIdParaExcluir?.let { viewModel.excluirMedicamento(it) }
+            medicamentoIdParaExcluir = null
+            medicamentoNomeParaExcluir = null
         },
-        onDismiss = { medicamentoParaExcluir = null } // Fecha o dialog ao cancelar
+        onDismiss = { 
+            medicamentoIdParaExcluir = null
+            medicamentoNomeParaExcluir = null
+        }
     )
 
     Scaffold(
+        containerColor = Color.Transparent,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Meus Medicamentos",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        text = "Meus Medicamentos",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
                 actions = {
                     IconButton(onClick = onNavigateToCadastro) {
                         Icon(
@@ -90,7 +101,8 @@ fun MedicamentoScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
                 )
             )
         }
@@ -112,10 +124,14 @@ fun MedicamentoScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                    .padding(top = paddingValues.calculateTopPadding()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 8.dp,
+                    bottom = 16.dp
+                )
             ) {
                 items(
                     items = medicamentos,
@@ -124,8 +140,8 @@ fun MedicamentoScreen(
                     MedicamentoItem(
                         medicamento = medUi,
                         onDeleteClick = {
-                            // Opcional: Adicionar um Dialog de confirmação aqui
-                            medicamentoParaExcluir = medUi.entityOriginal
+                            medicamentoIdParaExcluir = medUi.id
+                            medicamentoNomeParaExcluir = medUi.nome
                         },
                         onEditClick = {
                             onNavigateToDetalhes(medUi.id)
@@ -139,18 +155,18 @@ fun MedicamentoScreen(
 
 @Composable
 fun DialogConfirmarExclusao(
-    medicamento: MedicamentoEntity?,
+    medicamentoNome: String?,
     onConfirmar: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    if (medicamento == null) return
+    if (medicamentoNome == null) return
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Excluir Medicamento") },
         text = {
             Text(
-                "Deseja remover \"${medicamento.nome}\"?\n\n" +
+                "Deseja remover \"$medicamentoNome\"?\n\n" +
                         "As doses de hoje serão canceladas, mas o histórico será preservado."
             )
         },

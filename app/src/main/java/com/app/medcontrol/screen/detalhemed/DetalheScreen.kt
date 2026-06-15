@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.MedicamentoEntity
-import java.time.format.DateTimeFormatter
+import com.app.medcontrol.util.DateTimeUtils
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -272,7 +272,7 @@ fun HistoricoConteudo(
                         }
                         Spacer(Modifier.width(16.dp))
 
-                        val horaPrevista = registro.dataHoraPrevista.format(DateTimeFormatter.ofPattern("HH:mm"))
+                        val horaPrevista = registro.dataHoraPrevista.format(DateTimeUtils.HH_MM)
                         if (ehEsquecido) {
                             Text(
                                 text = "Previsto: $horaPrevista • Não tomado (Esquecido)",
@@ -281,7 +281,7 @@ fun HistoricoConteudo(
                                 fontWeight = FontWeight.Medium
                             )
                         } else {
-                            val horaTomada = registro.dataHoraTomado!!.format(DateTimeFormatter.ofPattern("HH:mm"))
+                            val horaTomada = registro.dataHoraTomado!!.format(DateTimeUtils.HH_MM)
                             Text(
                                 text = "Previsto: $horaPrevista • Tomado: $horaTomada",
                                 color = Color(0xFF78909C),

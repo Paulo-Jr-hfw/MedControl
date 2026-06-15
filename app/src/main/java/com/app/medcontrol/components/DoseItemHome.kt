@@ -29,13 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import com.app.medcontrol.R
 import com.app.medcontrol.data.entity.StatusConsumo
 import com.app.medcontrol.screen.Paciente.DoseAgendada
 import com.app.medcontrol.ui.theme.AmberSignal
@@ -70,18 +66,7 @@ fun DoseItemHome(
         CartaoStatus.NORMAL -> Color.Transparent
     }
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.55f) // Casamento perfeito com a Progress Bar
-        ),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f))
-    ) {
-
+    GlassCard {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,15 +96,11 @@ fun DoseItemHome(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                AsyncImage(
-                    model = dose.imagemUri,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
+                MedImage(
+                    uri = dose.imagemUri,
+                    size = 52.dp,
+                    shape = CircleShape,
+                    backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                 )
 
                 Column(
