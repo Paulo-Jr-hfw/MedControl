@@ -3,6 +3,7 @@ package com.app.medcontrol.di
 import android.content.Context
 import com.app.medcontrol.service.AlarmScheduler
 import com.app.medcontrol.service.healthconnect.HealthConnectManager
+import com.app.medcontrol.service.notification.NotificationHelper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,5 +25,11 @@ object ServiceModule {
     @Singleton
     fun provideHealthConnectManager(@ApplicationContext context: Context): HealthConnectManager {
         return HealthConnectManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationHelper(@ApplicationContext context: Context): NotificationHelper {
+        return NotificationHelper(context)
     }
 }
