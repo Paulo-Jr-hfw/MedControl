@@ -11,20 +11,18 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Lembrete de Medicamentos"
-            val descriptionText = "Canal para avisar a hora de tomar os remédios"
-            val importance = NotificationManager.IMPORTANCE_HIGH
+        val name = "Lembrete de Medicamentos"
+        val descriptionText = "Canal para avisar a hora de tomar os remédios"
+        val importance = NotificationManager.IMPORTANCE_HIGH
 
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-                enableLights(true)
-                enableVibration(true)
-                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
-            }
-
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+            enableLights(true)
+            enableVibration(true)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
         }
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 }

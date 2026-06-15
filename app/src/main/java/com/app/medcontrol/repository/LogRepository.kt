@@ -4,9 +4,9 @@ import com.app.medcontrol.data.dao.LogGeralDao
 import com.app.medcontrol.data.entity.LogGeralEntity
 import com.app.medcontrol.data.entity.StatusEvento
 import com.app.medcontrol.data.entity.TipoEvento
+import com.app.medcontrol.util.DateTimeUtils
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,8 +41,7 @@ class LogRepository @Inject constructor(
         glicose: Double,
         temperatura: Double
     ) {
-        val formatter = DateTimeFormatter.ofPattern("HH:mm")
-        val hora = LocalTime.now().format(formatter)
+        val hora = LocalTime.now().format(DateTimeUtils.HH_MM)
 
         val temAlerta = paSistolica > 140 || paDiastolica > 90 || fc > 100 || (spo2 in 1..92) || (glicose in 0.1..70.0) || glicose > 200 || temperatura > 37.8
 

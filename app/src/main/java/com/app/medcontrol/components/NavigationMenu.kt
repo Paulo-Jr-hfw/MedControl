@@ -2,7 +2,6 @@ package com.app.medcontrol.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -43,13 +42,10 @@ fun NavigationMenu(navController: NavController, usuarioId: Int) {
 
     Surface(
         modifier = Modifier
-            .padding(
-                vertical = 10.dp
-            )
             .clip(
                 RoundedCornerShape(
-                    topStart = 28.dp,
-                    topEnd = 28.dp
+                    topStart = 32.dp,
+                    topEnd = 32.dp
                 )
             ),
 
@@ -64,7 +60,7 @@ fun NavigationMenu(navController: NavController, usuarioId: Int) {
         shadowElevation = 0.dp
     ) {
         NavigationBar(
-            modifier = Modifier.height(72.dp),
+            modifier = Modifier.height(96.dp),
             containerColor = Color.Transparent,
             tonalElevation = 0.dp
         ) {
