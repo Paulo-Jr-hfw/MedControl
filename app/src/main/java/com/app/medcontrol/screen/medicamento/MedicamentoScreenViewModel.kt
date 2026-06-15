@@ -3,11 +3,12 @@ package com.app.medcontrol.screen.medicamento
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.medcontrol.data.dao.MedicamentoDao
-import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.entity.MedicamentoEntity
+import com.app.medcontrol.domain.usecase.ExcluirMedicamentoUseCase
+import com.app.medcontrol.model.mapper.toUI
 import com.app.medcontrol.model.ui.MedicamentoUI
-import com.app.medcontrol.service.AlarmScheduler
+import com.app.medcontrol.repository.MedicamentoRepository
+import com.app.medcontrol.util.DateTimeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,15 +16,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 
 @HiltViewModel
 class MedicamentoScreenViewModel @Inject constructor(
-    private val medicamentoDao: MedicamentoDao,
-    private val alarmScheduler: AlarmScheduler,
-    private val registroDao: RegistroConsumoDao,
+    private val repository: MedicamentoRepository,
+    private val excluirMedicamentoUseCase: ExcluirMedicamentoUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -31,21 +30,9 @@ class MedicamentoScreenViewModel @Inject constructor(
     private val _UiEvent = Channel<MedicamentoUiEvent>()
     val UiEvent = _UiEvent.receiveAsFlow()
 
-    val listaMedicamentosUI = medicamentoDao.getAllMedicamentosAtivosFlow(usuarioId)
+    val listaMedicamentosUI = repository.getAllMedicamentosAtivosFlow(usuarioId)
         .map { lista ->
-            lista.map { entity ->
-                MedicamentoUI(
-                    id = entity.id,
-                    nome = entity.nome,
-                    dosagem = entity.dosagem,
-                    instrucoes = entity.instrucoes,
-                    horariosFormatados = entity.horario.joinToString(" • ") {
-                        it.format(DateTimeFormatter.ofPattern("HH:mm"))
-                    },
-                    imagemUri = entity.imagemUri,
-                    entityOriginal = entity
-                )
-            }
+            lista.map { it.toUI() }
         }
         .stateIn(
             scope = viewModelScope,
@@ -53,21 +40,11 @@ class MedicamentoScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    fun excluirMedicamento(medicamento: MedicamentoEntity) {
+    fun excluirMedicamento(medicamentoId: Int) {
         viewModelScope.launch {
             try {
-                val mId = medicamento.id
-                val medInativoSemFoto = medicamento.copy(ativo = false, imagemUri = null)
-
-                val registrosHoje = registroDao.getRegistrosPorMedicamentoHoje(mId)
-                registrosHoje.forEach { registro ->
-                    alarmScheduler.cancelarAlarme(registro.id)
-                }
+                excluirMedicamentoUseCase(medicamentoId)
                 _UiEvent.send(MedicamentoUiEvent.MostrarSnackbar("Medicamento removido com sucesso"))
-
-                medicamentoDao.updateMedicamento(medInativoSemFoto)
-                medicamentoDao.desativarMedicamento(mId)
-                registroDao.cancelarDosesPendentesHoje(mId)
             } catch ( e: Exception) {
                 e.printStackTrace()
                 _UiEvent.send(MedicamentoUiEvent.MostrarSnackbar("Erro ao excluir medicamento"))

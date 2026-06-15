@@ -3,17 +3,18 @@ package com.app.medcontrol.screen.Paciente
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
-import com.app.medcontrol.data.dao.MedicamentoDao
-import com.app.medcontrol.data.dao.RegistroConsumoDao
-import com.app.medcontrol.data.dao.UsuarioDao
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.StatusConsumo
 import com.app.medcontrol.data.entity.StatusEvento
 import com.app.medcontrol.data.entity.TipoEvento
+import com.app.medcontrol.repository.HistoricoRepository
 import com.app.medcontrol.repository.LogRepository
+import com.app.medcontrol.repository.MedicamentoRepository
+import com.app.medcontrol.repository.RegistroRepository
+import com.app.medcontrol.repository.UsuarioRepository
 import com.app.medcontrol.service.AlarmScheduler
+import com.app.medcontrol.util.DateTimeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,10 +28,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PacienteHomeScreenViewModel @Inject constructor(
-    private val usuarioDao: UsuarioDao,
-    private val medicamentoDao: MedicamentoDao,
-    private val registroDao: RegistroConsumoDao,
-    private val HistoricoMedicamentoDao: HistoricoMedicamentoDao,
+    private val usuarioRepository: UsuarioRepository,
+    private val medicamentoRepository: MedicamentoRepository,
+    private val registroRepository: RegistroRepository,
+    private val historicoRepository: HistoricoRepository,
     private val alarmScheduler: AlarmScheduler,
     private val logRepository: LogRepository,
     savedStateHandle: SavedStateHandle
@@ -42,11 +43,11 @@ class PacienteHomeScreenViewModel @Inject constructor(
     private val hoje = LocalDate.now()
 
     val uiState: StateFlow<HomeUiState> = combine(
-        registroDao.getDosesPendentesFlow(hoje),
-        registroDao.getTotalDosesDoDia(hoje),
-        registroDao.getDosesTomadasDoDia(hoje)
+        registroRepository.getDosesPendentesFlow(hoje),
+        registroRepository.getTotalDosesDoDia(hoje),
+        registroRepository.getDosesTomadasDoDia(hoje)
     ) { registrosComMed, total, tomadas ->
-        val usuario = usuarioDao.getUsuarioById(usuarioId)
+        val usuario = usuarioRepository.getUsuarioById(usuarioId)
 
         val listaDoses = registrosComMed.map { item ->
             DoseAgendada(
@@ -79,13 +80,13 @@ class PacienteHomeScreenViewModel @Inject constructor(
     }
 
     private suspend fun sincronizarDosesDiarias() {
-        val medicamentos = medicamentoDao.getMedicamentosAtivosList(usuarioId)
+        val medicamentos = medicamentoRepository.getMedicamentosAtivosList(usuarioId)
         val agora = LocalDateTime.now()
         val hoje = LocalDate.now()
 
 
         medicamentos.forEach { med ->
-            val dosesDoMedHoje = registroDao.verificarSeExisteDoseNoDia(med.id, hoje)
+            val dosesDoMedHoje = registroRepository.verificarSeExisteDoseNoDia(med.id, hoje)
 
             if (dosesDoMedHoje == 0) {
                 val horariosFuturos = med.horario.filter { it.isAfter(agora.toLocalTime()) }
@@ -100,15 +101,15 @@ class PacienteHomeScreenViewModel @Inject constructor(
                         )
                     }
 
-                    val idsGerados = registroDao.inserirRegistros(novosRegistros)
+                    val idsGerados = registroRepository.inserirRegistros(novosRegistros)
 
                     idsGerados.forEachIndexed { index, idLong ->
                         val registroId = idLong.toInt()
                         val registro = novosRegistros[index]
-                        val agora = LocalDateTime.now()
+                        val agoraObj = LocalDateTime.now()
                         val horarioDose = LocalDateTime.of(hoje, registro.horarioAgendado)
 
-                        if (horarioDose.isAfter(agora)) {
+                        if (horarioDose.isAfter(agoraObj)) {
                             alarmScheduler.agendarAlarme(
                                 registroId = registroId,
                                 horarioAgendado = horarioDose,
@@ -123,7 +124,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
 
     private fun observarMedicamentos() {
         viewModelScope.launch {
-            medicamentoDao.getAllMedicamentosByUsuarioId(usuarioId).collect { medicamentos ->
+            medicamentoRepository.getAllMedicamentosByUsuarioIdFlow(usuarioId).collect {
                 sincronizarDosesDiarias()
             }
         }
@@ -132,13 +133,13 @@ class PacienteHomeScreenViewModel @Inject constructor(
     fun marcarComoTomado(registroId: Int, medicamentoId: Int, usuarioId: Int) {
         viewModelScope.launch {
             try {
-                val registro = registroDao.getRegistroById(registroId)
-                val med = medicamentoDao.getMedicamentoById(medicamentoId)
+                val registro = registroRepository.getRegistroById(registroId)
+                val med = medicamentoRepository.getMedicamentoById(medicamentoId)
                 val agora = LocalDateTime.now()
 
                 registro?.let { reg ->
 
-                    registroDao.marcarComoTomado(
+                    registroRepository.marcarComoTomado(
                         registroId = registroId,
                         novoStatus = StatusConsumo.TOMADO,
                         horario = agora.toLocalTime()
@@ -154,7 +155,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
                         dataHoraTomado = agora,
                         usuarioId = usuarioId
                     )
-                    HistoricoMedicamentoDao.saveHistoricoMedicamento(novoHistorico)
+                    historicoRepository.saveHistoricoMedicamento(novoHistorico)
 
                     salvarLogMedicamento(
                         usuarioId = usuarioId,
@@ -176,9 +177,8 @@ class PacienteHomeScreenViewModel @Inject constructor(
         horarioAgendado: LocalTime,
         horarioReal: LocalTime
     ) {
-        val formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
         val status = calcularStatusLog(horarioAgendado, horarioReal)
-        val descricao = "Agendado: ${horarioAgendado.format(formatter)} • Tomado: ${horarioReal.format(formatter)}"
+        val descricao = "Agendado: ${horarioAgendado.format(DateTimeUtils.HH_MM)} • Tomado: ${horarioReal.format(DateTimeUtils.HH_MM)}"
 
         logRepository.registrarAcao(
             usuarioId = usuarioId,

@@ -3,10 +3,10 @@ package com.app.medcontrol.screen.detalhemed
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.medcontrol.data.dao.HistoricoMedicamentoDao
-import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.MedicamentoEntity
+import com.app.medcontrol.repository.HistoricoRepository
+import com.app.medcontrol.repository.MedicamentoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,8 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetalheScreenViewModel @Inject constructor(
-    private val medicamentoDao: MedicamentoDao,
-    historicoMedicamentoDao: HistoricoMedicamentoDao,
+    private val repository: MedicamentoRepository,
+    private val historicoRepository: HistoricoRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val medicamentoId: Int = checkNotNull(savedStateHandle["medicamentoId"])
@@ -31,11 +31,11 @@ class DetalheScreenViewModel @Inject constructor(
 
     val abaSelecionada = _abaSelecionada.asStateFlow()
     val medicamentoState = flow {
-        val medicamento = medicamentoDao.getMedicamentoById(medicamentoId)
+        val medicamento = repository.getMedicamentoById(medicamentoId)
         emit(medicamento)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val historicoAgrupado = historicoMedicamentoDao.getHistoricoMedicamentosByMedicamentoId(medicamentoId)
+    val historicoAgrupado = historicoRepository.getHistoricoMedicamentosByMedicamentoId(medicamentoId)
         .map { listaBruta ->
             listaBruta.groupBy { registro ->
                 registro.dataHoraPrevista.toLocalDate()
