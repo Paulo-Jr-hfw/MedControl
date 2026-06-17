@@ -1,10 +1,13 @@
 package com.app.medcontrol.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,8 +23,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,10 +31,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.medcontrol.model.ui.SinaisUI
@@ -45,13 +49,10 @@ fun SinaisItem(
     onExcluirClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier
+    GlassCard (
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(vertical = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -73,13 +74,13 @@ fun SinaisItem(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Excluir",
-                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
                         modifier = Modifier.size(20.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
 
             FlowRow(
@@ -143,6 +144,62 @@ fun SinalQuadrante(
             Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
             Text(text = valor, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Text(text = unidade, fontSize = 12.sp, color = Color.Gray)
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Composable
+fun SinaisItemPreview() {
+    val mintBase = Color(0xFFBFF0DB)
+    val limeLight = Color(0xFFE3FCEF)
+    val turquoiseDeep = Color(0xFF1ADBB1)
+
+
+    val mockSinal = SinaisUI(
+        sinaisId = 1,
+        dataFormatada = "Quarta-feira, 17 de junho • 14:30",
+        frequenciaCardiaca = "78",
+        pressaoArterial = "12/8",
+        oxigenacaoSanguinea = "98",
+        temperatura = "36.6",
+        glicose = "92",
+        observacoes = "Aferido em repouso após o almoço."
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(mintBase)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(limeLight, Color.Transparent),
+                    center = Offset(x = Float.POSITIVE_INFINITY, y = 0f),
+                    radius = 700f
+                )
+            )
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(turquoiseDeep, Color.Transparent),
+                    center = Offset(x = Float.POSITIVE_INFINITY, y = Float.POSITIVE_INFINITY),
+                    radius = 800f
+                )
+            )
+            .padding(16.dp)
+    ) {
+        Column {
+            Text(
+                text = "Histórico de Sinais Vitais",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1C2D2C),
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+
+            SinaisItem(
+                sinal = mockSinal,
+                onExcluirClick = {}
+            )
         }
     }
 }
