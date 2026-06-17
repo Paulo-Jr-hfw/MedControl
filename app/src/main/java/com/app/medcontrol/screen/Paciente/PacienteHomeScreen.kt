@@ -1,6 +1,5 @@
 package com.app.medcontrol.screen.Paciente
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,8 +27,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,8 +36,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.R
 import com.app.medcontrol.components.DoseItemHome
 import com.app.medcontrol.components.ProgressBarDinamica
-import com.app.medcontrol.ui.theme.GradientEnd
-import com.app.medcontrol.ui.theme.GradientStart
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -52,53 +47,39 @@ fun PacienteHomeScreen(
     onNavigateToCadastroSinais: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val diagonalGradient = Brush.linearGradient(
-        colors = listOf(GradientStart, GradientEnd),
-        start = Offset(0f, 0f),
-        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(diagonalGradient)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 16.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 0.dp
-            ),
-
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item { Header(nomeUsuario = uiState.nomeUser) }
-            item {
-                ProgressBarDinamica(
-                    total = uiState.totalDosesDia,
-                    tomadas = uiState.dosesTomadas
-                )
-            }
-            item {
-                RowButtons(
-                    onNavigateToCadastroMed = onNavigateToCadastroMed,
-                    onNavigateToCadastroSinais = onNavigateToCadastroSinais
-                )
-            }
-            secaoListaMedicamentos(
-                doses = uiState.dosesPendentes,
-                onConfirmar = { dose ->
-                    viewModel.marcarComoTomado(
-                        registroId = dose.registroId,
-                        medicamentoId = dose.medicamentoId,
-                        usuarioId = dose.usuarioId
-                    )
-                }
+        item { Header(nomeUsuario = uiState.nomeUser) }
+        item {
+            ProgressBarDinamica(
+                total = uiState.totalDosesDia,
+                tomadas = uiState.dosesTomadas
             )
         }
+        item {
+            RowButtons(
+                onNavigateToCadastroMed = onNavigateToCadastroMed,
+                onNavigateToCadastroSinais = onNavigateToCadastroSinais
+            )
+        }
+        secaoListaMedicamentos(
+            doses = uiState.dosesPendentes,
+            onConfirmar = { dose ->
+                viewModel.marcarComoTomado(
+                    registroId = dose.registroId,
+                    medicamentoId = dose.medicamentoId,
+                    usuarioId = dose.usuarioId
+                )
+            }
+        )
     }
 }
 
