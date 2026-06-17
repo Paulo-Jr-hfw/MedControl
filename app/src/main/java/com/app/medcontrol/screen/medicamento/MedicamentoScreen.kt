@@ -38,7 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.components.MedicamentoItem
-import com.app.medcontrol.data.entity.MedicamentoEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +76,6 @@ fun MedicamentoScreen(
             medicamentoNomeParaExcluir = null
         }
     )
-
     Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

@@ -9,20 +9,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.components.NavigationMenu
 import com.app.medcontrol.screen.Paciente.PacienteHomeScreen
 import com.app.medcontrol.screen.historico.LogGeralScreen
 import com.app.medcontrol.screen.medicamento.MedicamentoScreen
 import com.app.medcontrol.screen.sinais.SinaisScreen
-import com.app.medcontrol.ui.theme.GradientEnd
-import com.app.medcontrol.ui.theme.GradientStart
 
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -35,28 +33,16 @@ fun MainContainer(
     val internalNavController = rememberNavController()
     val queryArg = "?usuarioId={usuarioId}"
 
-    Scaffold(
-        containerColor = Color.Transparent,
-        bottomBar = {
-            NavigationMenu(
-                navController = internalNavController,
-                usuarioId = usuarioId
-            )
-        }
-    ) { paddingValues ->
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            GradientStart,
-                            GradientEnd
-                        )
-                    )
+    MeshBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            bottomBar = {
+                NavigationMenu(
+                    navController = internalNavController,
+                    usuarioId = usuarioId
                 )
-        ) {
+            }
+        ) { paddingValues ->
 
             NavHost(
                 navController = internalNavController,
@@ -122,4 +108,5 @@ fun MainContainer(
                 }
             }
         }
-    }}
+    }
+}
