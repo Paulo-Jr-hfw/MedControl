@@ -38,6 +38,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -142,9 +143,14 @@ fun SinaisContent(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(top = paddingValues.calculateTopPadding()),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(16.dp)
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 8.dp,
+                    bottom = 16.dp
+                )
             ) {
                 items(state.listaSinais) { sinal ->
                     SinaisItem(
@@ -185,6 +191,10 @@ fun SinaisTopBar(onRegistrarClick: () -> Unit) {
                 Text(text = "Sinais", fontWeight = FontWeight.Bold)
             }
         },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent
+        ),
         actions = {
             Button(
                 onClick =  onRegistrarClick,
@@ -216,7 +226,6 @@ fun SelecaoRegistroContent(
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
-        // Botão Smartwatch (O Diferencial)
         OutlinedCard(
             onClick = onRelogioClick,
             modifier = Modifier.fillMaxWidth(),

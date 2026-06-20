@@ -1,27 +1,15 @@
 package com.app.medcontrol.screen.historico
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.MonitorHeart
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -38,9 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.app.medcontrol.data.entity.LogGeralEntity
-import com.app.medcontrol.data.entity.StatusEvento
-import com.app.medcontrol.data.entity.TipoEvento
+import com.app.medcontrol.components.LogItem
 import com.app.medcontrol.model.ui.LogGeralUI
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -66,9 +53,15 @@ fun LogGeralScreenContent(
     onVoltar: () -> Unit
 ) {
     Scaffold(
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
                 title = { Text("Histórico de Interações") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
+                ),
                 navigationIcon = {
                     IconButton(onClick = onVoltar) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
@@ -78,10 +71,7 @@ fun LogGeralScreenContent(
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFF8F9FA))
+            modifier = Modifier.fillMaxSize()
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -91,21 +81,25 @@ fun LogGeralScreenContent(
                 Text("Nenhum registro encontrado.", modifier = Modifier.align(Alignment.Center), color = Color.Gray)
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier.fillMaxSize()
+                        .padding(top = paddingValues.calculateTopPadding()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 8.dp,
+                        bottom = paddingValues.calculateBottomPadding() + 16.dp
+                    )
                 ) {
                     val datasOrdenadas = uiState.logsAgrupados.keys.sortedDescending()
 
                     datasOrdenadas.forEach { data ->
-                        // Cabeçalho do Dia
                         item {
                             DataHeader(data = data)
                         }
 
-                        // Itens do Dia
                         items(uiState.logsAgrupados[data] ?: emptyList()) { log ->
-                            LogItemZigZag(log = log)
+                            LogItem(log = log)
                         }
                     }
                 }
@@ -124,81 +118,4 @@ fun DataHeader(data: java.time.LocalDate) {
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(vertical = 8.dp)
     )
-}
-
-@Composable
-fun LogItemZigZag(log: LogGeralEntity) {
-
-    val alinhamentoADireita = log.tipoEvento == TipoEvento.MEDICAMENTO
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (alinhamentoADireita) Arrangement.End else Arrangement.Start
-    ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(0.85f),
-            shape = RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-                bottomStart = if (alinhamentoADireita) 16.dp else 2.dp,
-                bottomEnd = if (alinhamentoADireita) 2.dp else 16.dp
-            ),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(2.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                val corStatus = when (log.status) {
-                    StatusEvento.SUCESSO -> Color(0xFF26A69A)
-                    StatusEvento.ATRASADO -> Color(0xFFFFA726)
-                    StatusEvento.ALERTA -> Color(0xFFEF5350)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(corStatus.copy(alpha = 0.1f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (log.tipoEvento == TipoEvento.MEDICAMENTO)
-                            Icons.Default.MedicalServices else Icons.Default.MonitorHeart,
-                        contentDescription = null,
-                        tint = corStatus,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = log.titulo,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF37474F)
-                        )
-                        Text(
-                            text = log.dataHora.format(DateTimeFormatter.ofPattern("HH:mm")),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
-                        )
-                    }
-                    Text(
-                        text = log.descricao,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF546E7A)
-                    )
-                }
-            }
-        }
-    }
 }

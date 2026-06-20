@@ -1,13 +1,12 @@
 package com.app.medcontrol.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,24 +22,24 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.medcontrol.model.ui.SinaisUI
+import com.app.medcontrol.ui.theme.signalBorderBrush
+import com.app.medcontrol.ui.theme.signalGlassBackground
 
 
 @Composable
@@ -89,23 +88,23 @@ fun SinaisItem(
                 maxItemsInEachRow = 3
             ) {
                 sinal.frequenciaCardiaca?.let {
-                    SinalQuadrante(it, "bpm", Icons.Default.FavoriteBorder, Color(0xFFE57373), Color(0xFFFFEBEE))
+                    SinalQuadrante(it, "bpm", Icons.Default.FavoriteBorder, Color(0xFFE57373))
                 }
 
                 sinal.pressaoArterial?.let {
-                    SinalQuadrante(it, "mmHg", Icons.Default.Timeline, Color(0xFF4DB6AC), Color(0xFFE0F2F1))
+                    SinalQuadrante(it, "mmHg", Icons.Default.Timeline, Color(0xFF4DB6AC))
                 }
 
                 sinal.oxigenacaoSanguinea?.let {
-                    SinalQuadrante(it, "SpO2", Icons.Default.Air, Color(0xFF4DD0E1), Color(0xFFE0F7FA))
+                    SinalQuadrante(it, "SpO2", Icons.Default.Air, Color(0xFF4DD0E1))
                 }
 
                 sinal.temperatura?.let {
-                    SinalQuadrante(it, "°C", Icons.Default.Thermostat, Color(0xFFFFB74D), Color(0xFFFFF3E0))
+                    SinalQuadrante(it, "°C", Icons.Default.Thermostat, Color(0xFFFFB74D))
                 }
 
                 sinal.glicose?.let {
-                    SinalQuadrante(it, "mg/dL", Icons.Default.Opacity, Color(0xFFBA68C8), Color(0xFFF3E5F5))
+                    SinalQuadrante(it, "mg/dL", Icons.Default.Opacity, Color(0xFFBA68C8))
                 }
             }
 
@@ -127,78 +126,43 @@ fun SinalQuadrante(
     valor: String,
     unidade: String,
     icon: ImageVector,
-    iconColor: Color,
-    containerColor: Color
+    themeColor: Color
 ) {
-    Surface(
+    val shape = RoundedCornerShape(16.dp)
+
+    Card(
         modifier = Modifier
-            .widthIn(min = 100.dp)
-            .padding(4.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = containerColor
+            .padding(4.dp)
+            .widthIn(max = 96.dp)
+            .background(themeColor.signalGlassBackground, shape = shape),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.2.dp, brush = themeColor.signalBorderBrush),
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
-            Text(text = valor, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(text = unidade, fontSize = 12.sp, color = Color.Gray)
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 640)
-@Composable
-fun SinaisItemPreview() {
-    val mintBase = Color(0xFFBFF0DB)
-    val limeLight = Color(0xFFE3FCEF)
-    val turquoiseDeep = Color(0xFF1ADBB1)
-
-
-    val mockSinal = SinaisUI(
-        sinaisId = 1,
-        dataFormatada = "Quarta-feira, 17 de junho • 14:30",
-        frequenciaCardiaca = "78",
-        pressaoArterial = "12/8",
-        oxigenacaoSanguinea = "98",
-        temperatura = "36.6",
-        glicose = "92",
-        observacoes = "Aferido em repouso após o almoço."
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(mintBase)
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(limeLight, Color.Transparent),
-                    center = Offset(x = Float.POSITIVE_INFINITY, y = 0f),
-                    radius = 700f
-                )
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = themeColor,
+                modifier = Modifier.size(20.dp)
             )
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(turquoiseDeep, Color.Transparent),
-                    center = Offset(x = Float.POSITIVE_INFINITY, y = Float.POSITIVE_INFINITY),
-                    radius = 800f
-                )
-            )
-            .padding(16.dp)
-    ) {
-        Column {
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Histórico de Sinais Vitais",
-                fontSize = 20.sp,
+                text = valor,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1C2D2C),
-                modifier = Modifier.padding(vertical = 12.dp)
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
             )
-
-            SinaisItem(
-                sinal = mockSinal,
-                onExcluirClick = {}
+            Text(
+                text = unidade,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
     }
