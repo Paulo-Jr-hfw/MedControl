@@ -1,6 +1,5 @@
 package com.app.medcontrol.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,14 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
@@ -36,16 +31,10 @@ fun ProgressBarDinamica(total: Int, tomadas: Int) {
 
     val progresso = if (total > 0) tomadas.toFloat() / total.toFloat() else 0f
 
-    Card(
+    GlassCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.55f)
-        ),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f))
+            .padding(vertical = 6.dp)
     ) {
         Row(
             modifier = Modifier
@@ -72,7 +61,7 @@ fun ProgressBarDinamica(total: Int, tomadas: Int) {
                             color = TextPrimary
                         )
                         ) {
-                            append(String.format("%02d", tomadas))
+                            append("$tomadas")
                         }
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Light, fontSize = 20.sp, color = TextSecondary)) {
                             append(" / $total\n")
