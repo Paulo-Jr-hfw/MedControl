@@ -46,8 +46,7 @@ fun CadastroSinaisScreen(
 
     MeshBackground {
         Scaffold(
-            containerColor = Color.Transparent,
-            topBar = { /* Sua TopBar aqui */ }
+            containerColor = Color.Transparent
         ) { paddingValues ->
             Column(
                 modifier = Modifier
@@ -88,7 +87,6 @@ fun CadastroSinaisScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                // Campo de Observações
                 OutlinedTextField(
                     value = uiState.observacoes,
                     onValueChange = { viewModel.onObservacoesChange(it) },
@@ -97,9 +95,9 @@ fun CadastroSinaisScreen(
                     minLines = 3
                 )
 
-                Spacer(modifier = Modifier.weight(1f)) // Empurra os botões para o final
+                Spacer(modifier = Modifier.weight(1f))
 
-                // BOTÕES LADO A LADO
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -116,10 +114,10 @@ fun CadastroSinaisScreen(
                     Button(
                         onClick = { viewModel.SalvarSinais() },
                         modifier = Modifier.weight(1f),
-                        enabled = !uiState.isLoading // Desabilita enquanto salva
+                        enabled = !uiState.isLoading
                     ) {
                         if (uiState.isLoading) {
-                            // Se estiver carregando, mostra um indicador de progresso
+                            Text("Salvando...")
                         } else {
                             Text("Salvar")
                         }
