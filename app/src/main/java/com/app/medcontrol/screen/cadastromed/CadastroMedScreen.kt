@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -114,10 +116,10 @@ fun CadastroMedScreen(
                 .imePadding(),
             containerColor = Color.Transparent,
             bottomBar = {
-                BotaoSalvar(
-                    onClick = { viewModel.onSalvarClick() },
-                    enabled = !uiState.isLoading,
-                    modifier = Modifier.padding(16.dp)
+                RowSeletor(
+                    onSalvar = viewModel::onSalvaMedicamento,
+                    onCancelar = onNavigateBack,
+                    salvando = uiState.isLoading
                 )
             }
         ) { paddingValues ->
@@ -180,7 +182,6 @@ fun CadastroMedScreen(
             onDispensar = { viewModel.fecharDialogoPermissao() },
             onAgoraNao = {
                 viewModel.fecharDialogoPermissao()
-                // Chama o salvar diretamente (o AlarmScheduler tratará a falta de permissão)
                 viewModel.onSalvaMedicamento()
             }
         )
@@ -291,18 +292,33 @@ private fun ImagemSelecionada(uri: Uri) {
 }
 
 @Composable
-fun BotaoSalvar(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
-    enabled: Boolean
+fun RowSeletor(
+    onSalvar: () -> Unit,
+    onCancelar: () -> Unit,
+    salvando: Boolean
 ) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(if (enabled) "SALVAR" else "SALVANDO...")
+        OutlinedButton(
+            onClick = onCancelar,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text("CANCELAR")
+        }
+
+        Button(
+            onClick = onSalvar,
+            enabled = !salvando,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(if (salvando) "SALVANDO..." else "SALVAR")
+        }
     }
 }
 
