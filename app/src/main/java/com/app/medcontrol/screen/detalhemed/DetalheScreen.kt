@@ -30,8 +30,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.medcontrol.components.GlassCard
+import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.MedicamentoEntity
 import com.app.medcontrol.util.DateTimeUtils
@@ -78,28 +78,31 @@ fun DetalheMedicamentoContent(
     onEditar: (Int) -> Unit,
     onMudarAba: (Int) -> Unit
 ) {
-    Scaffold { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFF8F9FA))
-        ) {
-            HeaderMedicamento(
-                medicamento = state.medicamento,
-                onVoltar = onVoltar,
-                onEditar = onEditar
-            )
+    MeshBackground {
+        Scaffold(
+            containerColor = Color.Transparent
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                HeaderMedicamento(
+                    medicamento = state.medicamento,
+                    onVoltar = onVoltar,
+                    onEditar = onEditar
+                )
 
-            TabsMedicamento(
-                abaSelecionada = state.abaSelecionada,
-                onMudarAba = onMudarAba
-            )
+                TabsMedicamento(
+                    abaSelecionada = state.abaSelecionada,
+                    onMudarAba = onMudarAba
+                )
 
-            Crossfade(targetState = state.abaSelecionada) { aba ->
-                when (aba) {
-                    0 -> DetalhesConteudo(state.medicamento)
-                    1 -> HistoricoConteudo(state.historico)
+                Crossfade(targetState = state.abaSelecionada) { aba ->
+                    when (aba) {
+                        0 -> DetalhesConteudo(state.medicamento)
+                        1 -> HistoricoConteudo(state.historico)
+                    }
                 }
             }
         }
@@ -123,7 +126,7 @@ fun HeaderMedicamento(
             )
             .padding(16.dp)
     ) {
-        // Botão Voltar
+
         IconButton(
             onClick = onVoltar,
             modifier = Modifier
@@ -133,14 +136,14 @@ fun HeaderMedicamento(
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
         }
 
-        // Info do Medicamento
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(bottom = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagem ou Placeholder
+
             Surface(
                 modifier = Modifier.size(80.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -170,7 +173,7 @@ fun HeaderMedicamento(
                 )
             }
 
-            // Botão Editar
+
             IconButton(
                 onClick = { medicamento?.let { onEditar(it.id) } },
                 modifier = Modifier
@@ -187,12 +190,8 @@ fun TabsMedicamento(
     abaSelecionada: Int,
     onMudarAba: (Int) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE9ECEF))
+    GlassCard(
+        modifier = Modifier.padding(16.dp)
     ) {
         Row (modifier = Modifier.padding(4.dp)) {
             TabItem("Detalhes", abaSelecionada == 0, Modifier.weight(1f)) {
@@ -255,12 +254,7 @@ fun HistoricoConteudo(
             items(historicoAgrupado[data] ?: emptyList()) { registro ->
                 val ehEsquecido = registro.dataHoraTomado == null
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(2.dp)
-                ) {
+                GlassCard {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
@@ -281,10 +275,10 @@ fun HistoricoConteudo(
                                 fontWeight = FontWeight.Medium
                             )
                         } else {
-                            val horaTomada = registro.dataHoraTomado!!.format(DateTimeUtils.HH_MM)
+                            val horaTomada = registro.dataHoraTomado.format(DateTimeUtils.HH_MM)
                             Text(
                                 text = "Previsto: $horaPrevista • Tomado: $horaTomada",
-                                color = Color(0xFF78909C),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -301,32 +295,32 @@ fun DetalhesConteudo(medicamento: MedicamentoEntity?) {
         .fillMaxSize()
         .padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Card Instruções
-        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        GlassCard {
             Column(Modifier.padding(16.dp)) {
-                Text("INSTRUÇÕES", style = MaterialTheme.typography.labelLarge, color = Color(0xFF78909C), fontWeight = FontWeight.Bold)
+                Text("INSTRUÇÕES", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                Text(text = medicamento?.instrucoes ?: "Sem instruções adicionais", color = Color.DarkGray)
+                Text(text = medicamento?.instrucoes ?: "Sem instruções adicionais", color = MaterialTheme.colorScheme.onSurface)
             }
         }
 
         // Card Horários
-        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        GlassCard {
             Column(Modifier.padding(16.dp)) {
-                Text("HORÁRIOS", style = MaterialTheme.typography.labelLarge, color = Color(0xFF78909C), fontWeight = FontWeight.Bold)
+                Text("HORÁRIOS", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
                     medicamento?.horario?.forEach { hora ->
                         AssistChip(
                             onClick = {},
-                            label = { Text(hora.toString()) },
+                            label = { Text(hora.format(DateTimeUtils.HH_MM)) },
                             modifier = Modifier.padding(end = 8.dp),
                             leadingIcon = { Icon(Icons.Default.Schedule, null, Modifier.size(18.dp)) },
                             colors = AssistChipDefaults.assistChipColors(
-                                containerColor = Color(0xFFE0F2F1),
-                                labelColor = Color(0xFF26A69A),
-                                leadingIconContentColor = Color(0xFF26A69A)
+                                containerColor = Color.White.copy(alpha = 0.3f),
+                                labelColor = MaterialTheme.colorScheme.primary,
+                                leadingIconContentColor = MaterialTheme.colorScheme.primary
                             ),
-                            border = null,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                             shape = RoundedCornerShape(12.dp)
                         )
                     }
