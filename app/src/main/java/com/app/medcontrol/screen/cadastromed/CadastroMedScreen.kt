@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.components.SelecaoHorarios
 
 
@@ -107,61 +109,65 @@ fun CadastroMedScreen(
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding(),
-        bottomBar = {
-            BotaoSalvar(
-                onClick = { viewModel.onSalvarClick() },
-                enabled = !uiState.isLoading,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    ) { paddingValues ->
-        val focusManager = LocalFocusManager.current
-        Column(
+    MeshBackground {
+        Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        focusManager.clearFocus()
+                .imePadding(),
+            containerColor = Color.Transparent,
+            bottomBar = {
+                BotaoSalvar(
+                    onClick = { viewModel.onSalvarClick() },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        ) { paddingValues ->
+            val focusManager = LocalFocusManager.current
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    }
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                FotoCadastro(
+                    uri = uiState.imagemUri,
+                    onImagemUriChange = {
+                        galleryLauncher.launch("image/*")
                     })
-                }
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(scrollState)
-        ) {
-            FotoCadastro(
-                uri = uiState.imagemUri,
-                onImagemUriChange = {
-                    galleryLauncher.launch("image/*")
-                })
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            FormCadastroMed(
-                nome = uiState.nomeMed,
-                onNomeChange = viewModel::onNomeMedChange,
-                nomeErro = uiState.nomeMedErro,
-                dosagem = uiState.dosagem,
-                onDosagemChange = viewModel::onDosagemChange,
-                dosagemErro = uiState.dosagemErro,
-                instrucoes = uiState.instrucoes,
-                onInstrucoesChange = viewModel::onInstrucoesChange
-            )
+                FormCadastroMed(
+                    nome = uiState.nomeMed,
+                    onNomeChange = viewModel::onNomeMedChange,
+                    nomeErro = uiState.nomeMedErro,
+                    dosagem = uiState.dosagem,
+                    onDosagemChange = viewModel::onDosagemChange,
+                    dosagemErro = uiState.dosagemErro,
+                    instrucoes = uiState.instrucoes,
+                    onInstrucoesChange = viewModel::onInstrucoesChange
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            SelecaoHorarios(
-                horarios = uiState.listaHorarios,
-                onAdicionarHorario = { viewModel.onAdicionarHorario() },
-                onAtualizarHorario = viewModel::onAtualizarHorario,
-                onRemoverHorario = viewModel::onRemoverHorario,
-                indexEditando = uiState.indexHorarioEditando,
-                onSetEditando = viewModel::setEditando
-            )
+                SelecaoHorarios(
+                    horarios = uiState.listaHorarios,
+                    onAdicionarHorario = { viewModel.onAdicionarHorario() },
+                    onAtualizarHorario = viewModel::onAtualizarHorario,
+                    onRemoverHorario = viewModel::onRemoverHorario,
+                    indexEditando = uiState.indexHorarioEditando,
+                    onSetEditando = viewModel::setEditando
+                )
+            }
         }
     }
+
     if (uiState.mostrarDialogoPermissao) {
         DialogoPermissaoAlarme(
             onConfirmar = {
