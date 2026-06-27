@@ -55,7 +55,6 @@ import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.components.SelecaoHorarios
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CadastroMedScreen(
     viewModel: CadastroMedScreenViewModel = hiltViewModel(),
