@@ -34,22 +34,27 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.app.medcontrol.components.GlassCard
 import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.MedicamentoEntity
+import com.app.medcontrol.model.ui.DetalheMedicamentoUI
+import com.app.medcontrol.ui.theme.MedicalTeal
+import com.app.medcontrol.ui.theme.PureWhite
 import com.app.medcontrol.util.DateTimeUtils
 import java.time.format.TextStyle
 import java.util.Locale
@@ -73,7 +78,7 @@ fun DetalheMedicamentoScreen(
 
 @Composable
 fun DetalheMedicamentoContent(
-    state: DetalheMedicamentoUiState,
+    state: DetalheMedicamentoUI,
     onVoltar: () -> Unit,
     onEditar: (Int) -> Unit,
     onMudarAba: (Int) -> Unit
@@ -89,6 +94,7 @@ fun DetalheMedicamentoContent(
             ) {
                 HeaderMedicamento(
                     medicamento = state.medicamento,
+                    imagemArquivo = state.imagemArquivo,
                     onVoltar = onVoltar,
                     onEditar = onEditar
                 )
@@ -112,75 +118,98 @@ fun DetalheMedicamentoContent(
 @Composable
 fun HeaderMedicamento(
     medicamento: MedicamentoEntity?,
+    imagemArquivo: java.io.File?,
     onVoltar: () -> Unit,
     onEditar: (Int) -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF4DB6AC), Color(0xFF80CBC4))
-                )
-            )
-            .padding(16.dp)
+            .height(260.dp)
     ) {
 
-        IconButton(
-            onClick = onVoltar,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .background(Color.White.copy(alpha = 0.3f), shape = CircleShape)
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
-        }
+        if (imagemArquivo != null && imagemArquivo.exists()) {
+            AsyncImage(
+                model = imagemArquivo,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
 
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.4f),
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.5f)
+                            )
+                        )
+                    )
+            )
+        } else {
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(bottom = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Surface(
-                modifier = Modifier.size(80.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = Color.White.copy(alpha = 0.2f),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(MedicalTeal, MedicalTeal.copy(alpha = 0.7f))
+                        )
+                    )
             ) {
                 Icon(
                     imageVector = Icons.Default.MedicalServices,
                     contentDescription = null,
-                    modifier = Modifier.padding(16.dp),
-                    tint = Color.White
+                    modifier = Modifier
+                        .size(100.dp)
+                        .align(Alignment.Center)
+                        .alpha(0.2f),
+                    tint = PureWhite
                 )
             }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = medicamento?.nome ?: "Carregando...",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = medicamento?.dosagem ?: "",
-                    color = Color.White.copy(alpha = 0.8f)
-                )
-            }
+        }
 
 
-            IconButton(
-                onClick = { medicamento?.let { onEditar(it.id) } },
-                modifier = Modifier
-                    .background(Color.White.copy(alpha = 0.3f), shape = CircleShape)
-            ) {
-                Icon(Icons.Default.Edit, contentDescription = "Editar", tint = Color.White)
-            }
+        IconButton(
+            onClick = onVoltar,
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.TopStart)
+                .background(PureWhite.copy(alpha = 0.3f), shape = CircleShape)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = PureWhite)
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = medicamento?.nome ?: "Carregando...",
+                style = MaterialTheme.typography.headlineMedium,
+                color = PureWhite,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = medicamento?.dosagem ?: "",
+                color = PureWhite.copy(alpha = 0.9f),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
+
+        IconButton(
+            onClick = { medicamento?.let { onEditar(it.id) } },
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.BottomEnd)
+                .background(PureWhite.copy(alpha = 0.3f), shape = CircleShape)
+        ) {
+            Icon(Icons.Default.Edit, contentDescription = "Editar", tint = PureWhite)
         }
     }
 }
@@ -210,8 +239,8 @@ fun TabItem(titulo: String, selecionado: Boolean, modifier: Modifier, onClick: (
         onClick = onClick,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (selecionado) Color(0xFF26A69A) else Color.Transparent,
-            contentColor = if (selecionado) Color.White else Color.Gray
+            containerColor = if (selecionado) MedicalTeal else Color.Transparent,
+            contentColor = if (selecionado) PureWhite else Color.Gray
         ),
         shape = RoundedCornerShape(8.dp),
         elevation = null
@@ -259,10 +288,10 @@ fun HistoricoConteudo(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(Color(0xFFE0F2F1), CircleShape),
+                                .background(MedicalTeal.copy(alpha = 0.1f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Check, null, tint = Color(0xFF26A69A), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Check, null, tint = MedicalTeal, modifier = Modifier.size(20.dp))
                         }
                         Spacer(Modifier.width(16.dp))
 
@@ -303,7 +332,7 @@ fun DetalhesConteudo(medicamento: MedicamentoEntity?) {
             }
         }
 
-        // Card Horários
+
         GlassCard {
             Column(Modifier.padding(16.dp)) {
                 Text("HORÁRIOS", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
