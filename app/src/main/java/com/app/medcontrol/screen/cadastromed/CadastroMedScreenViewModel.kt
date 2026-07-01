@@ -154,11 +154,6 @@ class CadastroMedScreenViewModel @Inject constructor(
         }
     }
 
-    fun onSalvarClick() {
-        viewModelScope.launch {
-            _uiEvent.send(UiEvent.SolicitarPermissaoAlarme)
-        }
-    }
 
     fun mostrarDialogoPermissao() {
         _uiState.update { it.copy(mostrarDialogoPermissao = true) }
