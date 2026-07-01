@@ -1,12 +1,12 @@
 package com.app.medcontrol.screen.cadastromed
 
 import android.net.Uri
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.entity.MedicamentoEntity
+import com.app.medcontrol.util.ImageStorageManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +23,7 @@ data class CadastroMedUiState(
     val dosagem: String = "",
     val instrucoes: String = "",
     val imagemUri: Uri? = null,
+    val localImageName: String? = null,
     val listaHorarios: List<LocalTime> = listOf(LocalTime.of(8, 0)),
     val nomeMedErro: Boolean = false,
     val dosagemErro: Boolean = false,
@@ -34,6 +35,7 @@ data class CadastroMedUiState(
 @HiltViewModel
 class CadastroMedScreenViewModel @Inject constructor(
     private val medicamentoDao: MedicamentoDao,
+    private val imageStorageManager: ImageStorageManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -117,13 +119,25 @@ class CadastroMedScreenViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
+                // PONTO 1: Processar imagem apenas no momento de salvar
+                val nomeImagemFinal = if (medicamentoId != 0) {
+                    // Se for edição, usamos a lógica de substituição
+                    imageStorageManager.substituirImagemAntiga(
+                        nomeImagemAntiga = currentState.localImageName,
+                        novaUri = currentState.imagemUri
+                    ).invoke()
+                } else {
+                    // Se for novo cadastro, apenas salvamos se houver URI
+                    currentState.imagemUri?.let { imageStorageManager.saveImage(it) }
+                }
+
                 val entity = MedicamentoEntity(
                     id = medicamentoId,
                     usuarioId = usuarioId,
                     nome = currentState.nomeMed,
                     dosagem = currentState.dosagem,
                     instrucoes = currentState.instrucoes,
-                    imagemUri = currentState.imagemUri?.toString(),
+                    imagemUri = nomeImagemFinal,
                     horario = currentState.listaHorarios
                 )
 
@@ -164,12 +178,14 @@ class CadastroMedScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val medicamento = medicamentoDao.getMedicamentoById(medicamentoId)
             if (medicamento != null) {
+                val imageFile = imageStorageManager.getFileFromName(medicamento.imagemUri)
                 _uiState.update { state ->
                     state.copy(
                         nomeMed = medicamento.nome,
                         dosagem = medicamento.dosagem,
                         instrucoes = medicamento.instrucoes ?: "",
-                        imagemUri = medicamento.imagemUri?.toUri(),
+                        imagemUri = imageFile?.let { Uri.fromFile(it) },
+                        localImageName = medicamento.imagemUri,
                         listaHorarios = medicamento.horario
                     )
                 }

@@ -136,11 +136,11 @@ fun CadastroMedScreen(
                     .padding(16.dp)
                     .verticalScroll(scrollState)
             ) {
-                FotoCadastro(
-                    uri = uiState.imagemUri,
-                    onImagemUriChange = {
-                        galleryLauncher.launch("image/*")
-                    })
+            FotoCadastro(
+                uri = uiState.imagemUri,
+                onImagemUriChange = {
+                    galleryLauncher.launch("image/*")
+                })
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FormCadastroMed(

@@ -9,15 +9,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.app.medcontrol.util.ImageStorageManager
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface ImageStorageEntryPoint {
+    fun imageStorageManager(): ImageStorageManager
+}
 
 @Composable
 fun MedImage(
@@ -27,6 +40,19 @@ fun MedImage(
     shape: Shape = RoundedCornerShape(16.dp),
     backgroundColor: Color = Color.White.copy(alpha = 0.5f)
 ) {
+    val context = LocalContext.current
+    val imageStorageManager = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            ImageStorageEntryPoint::class.java
+        ).imageStorageManager()
+    }
+
+    val model = remember(uri) {
+        if (uri.isNullOrBlank()) null
+        else imageStorageManager.getFileFromName(uri)
+    }
+
     Box(
         modifier = modifier
             .size(size)
@@ -34,9 +60,9 @@ fun MedImage(
             .background(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
-        if (!uri.isNullOrEmpty()) {
+        if (model != null) {
             AsyncImage(
-                model = uri,
+                model = model,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
