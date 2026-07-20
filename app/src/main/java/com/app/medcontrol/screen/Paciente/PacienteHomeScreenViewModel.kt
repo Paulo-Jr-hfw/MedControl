@@ -16,9 +16,11 @@ import com.app.medcontrol.repository.UsuarioRepository
 import com.app.medcontrol.service.AlarmScheduler
 import com.app.medcontrol.util.DateTimeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -41,6 +43,13 @@ class PacienteHomeScreenViewModel @Inject constructor(
         ?: savedStateHandle.get<String>("usuarioId")?.toInt()
         ?: throw IllegalArgumentException("usuarioId é obrigatório e deve ser um Int")
     private val hoje = LocalDate.now()
+
+    private val _uiEvent = Channel<HomeUiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
+    sealed class HomeUiEvent {
+        object Logout : HomeUiEvent()
+    }
 
     val uiState: StateFlow<HomeUiState> = combine(
         registroRepository.getDosesPendentesFlow(hoje),
@@ -168,6 +177,12 @@ class PacienteHomeScreenViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            _uiEvent.send(HomeUiEvent.Logout)
         }
     }
 

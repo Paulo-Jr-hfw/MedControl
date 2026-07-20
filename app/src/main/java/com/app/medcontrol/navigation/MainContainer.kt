@@ -67,6 +67,9 @@ fun MainContainer(
                         },
                         onNavigateToCadastroSinais = {
                             onNavigateToGlobalRoute("${Routes.CadastroSinais.route}/$idRecuperado")
+                        },
+                        onLogout = {
+                            onNavigateToGlobalRoute(Routes.Login.route)
                         }
                     )
                 }

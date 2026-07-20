@@ -6,23 +6,29 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,20 +50,35 @@ import java.time.format.DateTimeFormatter
 fun PacienteHomeScreen(
     viewModel: PacienteHomeScreenViewModel = hiltViewModel(),
     onNavigateToCadastroMed: () -> Unit,
-    onNavigateToCadastroSinais: () -> Unit
+    onNavigateToCadastroSinais: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is PacienteHomeScreenViewModel.HomeUiEvent.Logout -> onLogout()
+            }
+        }
+    }
+
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
             top = 16.dp,
             bottom = 16.dp
         ),
+
+
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        item { Header(nomeUsuario = uiState.nomeUser) }
+        item { Header(
+            onLogoutClick = viewModel::logout,
+            nomeUsuario = uiState.nomeUser) }
         item {
             ProgressBarDinamica(
                 total = uiState.totalDosesDia,
@@ -84,12 +105,27 @@ fun PacienteHomeScreen(
 }
 
 @Composable
-fun Header(nomeUsuario: String) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        GreetingText(nome = nomeUsuario)
-        DataAtualText()
+fun Header(
+    onLogoutClick: () -> Unit,
+    nomeUsuario: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            GreetingText(nome = nomeUsuario)
+            DataAtualText()
+        }
+        IconButton(onClick = onLogoutClick) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                contentDescription = "Sair do aplicativo"
+            )
+        }
     }
 }
 
