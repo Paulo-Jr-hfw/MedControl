@@ -8,8 +8,15 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
+/.idea/
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# Kotlin
+.kotlin/
+
+# Gradle
+gradle/gradle-daemon-jvm.properties
