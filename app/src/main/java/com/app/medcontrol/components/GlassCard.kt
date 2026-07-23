@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,8 +22,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    tintColor: Color? = null,
     onClick: (() -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
+    containerColor: Color = Color.White.copy(alpha = 0.35f),
     content: @Composable ColumnScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(28.dp)
@@ -44,7 +46,7 @@ fun GlassCard(
             ),
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
+            containerColor = containerColor
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = BorderStroke(1.2.dp, borderBrush)
@@ -55,12 +57,12 @@ fun GlassCard(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.35f),
-                            Color.White.copy(alpha = 0.15f)
+                            Color.White.copy(alpha = 0.2f),
+                            Color.Transparent
                         )
                     )
                 )
-                .padding(10.dp)
+                .padding(contentPadding)
         ) {
             Column(content = content)
         }

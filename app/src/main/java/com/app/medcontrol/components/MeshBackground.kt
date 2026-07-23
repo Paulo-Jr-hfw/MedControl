@@ -14,22 +14,25 @@ import com.app.medcontrol.ui.theme.TurquoiseDeep
 
 @Composable
 fun MeshBackground(
+    baseColor: Color = MintBase,
+    topSpotColor: Color = LimeLight,
+    bottomSpotColor: Color = TurquoiseDeep,
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MintBase)
+            .background(baseColor)
             .background(
                 Brush.radialGradient(
-                    colors = listOf(LimeLight, Color.Transparent),
+                    colors = listOf(topSpotColor, Color.Transparent),
                     center = Offset(x = Float.POSITIVE_INFINITY, y = 0f),
                     radius = 700f
                 )
             )
             .background(
                 Brush.radialGradient(
-                    colors = listOf(TurquoiseDeep, Color.Transparent),
+                    colors = listOf(bottomSpotColor, Color.Transparent),
                     center = Offset(x = Float.POSITIVE_INFINITY, y = Float.POSITIVE_INFINITY),
                     radius = 800f
                 )

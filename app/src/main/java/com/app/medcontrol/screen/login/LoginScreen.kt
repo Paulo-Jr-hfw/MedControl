@@ -9,7 +9,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,8 +24,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SupervisorAccount
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,8 +51,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.R
+import com.app.medcontrol.components.GlassCard
+import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.components.PerfilSelect
 import com.app.medcontrol.model.TipoUsuario
+import com.app.medcontrol.ui.theme.LavenderLight
+import com.app.medcontrol.ui.theme.LimeLight
+import com.app.medcontrol.ui.theme.MintBase
+import com.app.medcontrol.ui.theme.PurpleBase
+import com.app.medcontrol.ui.theme.TurquoiseDeep
+import com.app.medcontrol.ui.theme.VioletDeep
 
 @Composable
 fun LoginScreen(
@@ -73,6 +81,13 @@ fun LoginScreen(
         }
     }
 
+    val isPaciente = tipoSelecionado == TipoUsuario.PACIENTE
+
+    MeshBackground(
+        baseColor = if (isPaciente) MintBase else PurpleBase,
+        topSpotColor = if (isPaciente) LimeLight else LavenderLight,
+        bottomSpotColor = if (isPaciente) TurquoiseDeep else VioletDeep
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,7 +97,7 @@ fun LoginScreen(
                     })
                 }
                 .padding(16.dp)) {
-            HeaderIncial(tipo = tipoSelecionado)
+            HeaderIncial()
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -97,20 +112,22 @@ fun LoginScreen(
                 tipo = tipoSelecionado,
                 email = uiState.email,
                 senha = uiState.senha,
-                onLogin = {viewModel.onLogin(tipoSelecionado)},
+                onLogin = { viewModel.onLogin(tipoSelecionado) },
                 onEmailChange = viewModel::onEmailChange,
                 onSenhaChange = viewModel::onPasswordChange,
                 loginError = uiState.loginError,
                 mensagemErro = uiState.mensagemErro,
                 onNavigateToCadastroUser = onNavigateToCadastro,
-                isLoading = uiState.isLoading
+                isLoading = uiState.isLoading,
+                primaryColor = if (isPaciente) Color(0xFF4CAF50) else Color(0xFF673AB7)
             )
 
+        }
     }
 }
 
 @Composable
-fun HeaderIncial(modifier: Modifier = Modifier, tipo: TipoUsuario) {
+fun HeaderIncial(modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Icon(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
@@ -133,9 +150,9 @@ fun UserLogin(tipo: TipoUsuario,
               onEmailChange: (String) -> Unit,
               onSenhaChange: (String) -> Unit,
               mensagemErro: String,
-              onNavigateToCadastroUser: () -> Unit) {
+              onNavigateToCadastroUser: () -> Unit,
+              primaryColor: Color) {
 
-    val primaryColor = if (tipo == TipoUsuario.PACIENTE) Color(0xFF4CAF50) else Color(0xFF673AB7)
     val focusManager = LocalFocusManager.current
 
     Column(
@@ -181,38 +198,42 @@ fun UserLogin(tipo: TipoUsuario,
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = onEmailChange,
-            label = { Text("E-mail") },
-            isError = loginError,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Down) } ),
-            shape = RoundedCornerShape(12.dp),
-            supportingText = {
-                if(loginError) Text(text = mensagemErro, color = Color.Red)
+        GlassCard {
+            Column(modifier = Modifier.padding(8.dp)) {
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = onEmailChange,
+                    label = { Text("E-mail") },
+                    isError = loginError,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                    shape = RoundedCornerShape(12.dp),
+                    supportingText = {
+                        if (loginError) Text(text = mensagemErro, color = Color.Red)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = senha,
+                    onValueChange = onSenhaChange,
+                    label = { Text("Senha") },
+                    isError = loginError,
+                    supportingText = null,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = { focusManager.clearFocus() }),
+                    shape = RoundedCornerShape(12.dp),
+                    visualTransformation = PasswordVisualTransformation()
+                )
             }
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = senha,
-            onValueChange = onSenhaChange,
-            label = { Text("Senha") },
-            isError = loginError,
-            supportingText = null,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = { focusManager.clearFocus() } ),
-            shape = RoundedCornerShape(12.dp),
-            visualTransformation = PasswordVisualTransformation()
-        )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -222,20 +243,25 @@ fun UserLogin(tipo: TipoUsuario,
             label = "ButtonColor"
         )
 
-        Button(
+        GlassCard(
             onClick = onLogin,
-            enabled = !isLoading,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = animatedButtonColor),
-            shape = RoundedCornerShape(12.dp)
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            contentPadding = PaddingValues(0.dp),
+            containerColor = animatedButtonColor.copy(alpha = 0.8f)
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-            } else {
-                Text(
-                    text = if (tipo == TipoUsuario.PACIENTE) "ENTRAR COMO PACIENTE" else "ENTRAR COMO ACOMPANHANTE",
-                    fontWeight = FontWeight.Bold
-                )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(
+                        text = if (tipo == TipoUsuario.PACIENTE) "ENTRAR COMO PACIENTE" else "ENTRAR COMO ACOMPANHANTE",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
         }
 

@@ -17,11 +17,16 @@ val MintBase = Color(0xFFBFF0DB)
 val LimeLight = Color(0xFFE3FCEF)
 val TurquoiseDeep = Color(0xFF1ADBB1)
 
+// acompanhante Purple Theme (Roxo)
+val PurpleBase = Color(0xFFE1BEE7)
+val LavenderLight = Color(0xFFF3E5F5)
+val VioletDeep = Color(0xFF9C27B0)
+
 //Brushes
 val Color.signalBorderBrush: Brush
     get() = Brush.verticalGradient(
         colors = listOf(
-            this.copy(alpha = 0.5f), // 'this' refere-se à própria cor que chama a extensão
+            this.copy(alpha = 0.5f),
             Color.White.copy(alpha = 0.2f)
         )
     )

@@ -7,12 +7,12 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,57 +48,59 @@ fun PerfilSelect(
         label = "ColorAnimation"
     ) { state ->
         if (state == TipoUsuario.PACIENTE)
-            Color(0xFF4CAF50)
+            Color(0xFF4CAF50).copy(alpha = 0.9f)
         else
-            Color(0xFF673AB7)
+            Color(0xFF673AB7).copy(alpha = 0.9f)
     }
 
-    Box(
+    GlassCard(
         modifier = Modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .background(Color(0xFFE0E0E0), RoundedCornerShape(27.dp))
-            .padding(4.dp)
+            .height(64.dp),
+        contentPadding = PaddingValues(4.dp)
     ) {
-
         Box(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .fillMaxHeight()
-                .align(BiasAlignment(bias, 0f))
-                .background(backgroundColor, RoundedCornerShape(23.dp))
-        )
-
-        Row(modifier = Modifier.fillMaxSize()) {
-
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Indicador deslizante
             Box(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth(0.5f)
                     .fillMaxHeight()
-                    .clickable { onTipoSelected(TipoUsuario.PACIENTE) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Paciente",
-                    color = if (tipoSelecionado == TipoUsuario.PACIENTE)
-                        Color.White else Color.Gray,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                    .align(BiasAlignment(bias, 0f))
+                    .background(backgroundColor, RoundedCornerShape(22.dp))
+            )
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable { onTipoSelected(TipoUsuario.ACOMPANHANTE) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Acompanhante",
-                    color = if (tipoSelecionado == TipoUsuario.ACOMPANHANTE)
-                        Color.White else Color.Gray,
-                    fontWeight = FontWeight.Bold
-                )
+            Row(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable { onTipoSelected(TipoUsuario.PACIENTE) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Paciente",
+                        color = if (tipoSelecionado == TipoUsuario.PACIENTE)
+                            Color.White else Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable { onTipoSelected(TipoUsuario.ACOMPANHANTE) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Acompanhante",
+                        color = if (tipoSelecionado == TipoUsuario.ACOMPANHANTE)
+                            Color.White else Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
