@@ -20,10 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.app.medcontrol.model.TipoUsuario
+import com.app.medcontrol.ui.theme.CompanionPrimary
+import com.app.medcontrol.ui.theme.PatientPrimary
+import com.app.medcontrol.ui.theme.PureWhite
+import com.app.medcontrol.ui.theme.TextSecondary
 
 @Composable
 fun PerfilSelect(
@@ -48,9 +51,9 @@ fun PerfilSelect(
         label = "ColorAnimation"
     ) { state ->
         if (state == TipoUsuario.PACIENTE)
-            Color(0xFF4CAF50).copy(alpha = 0.9f)
+            PatientPrimary.copy(alpha = 0.9f)
         else
-            Color(0xFF673AB7).copy(alpha = 0.9f)
+            CompanionPrimary.copy(alpha = 0.9f)
     }
 
     GlassCard(
@@ -82,7 +85,7 @@ fun PerfilSelect(
                     Text(
                         text = "Paciente",
                         color = if (tipoSelecionado == TipoUsuario.PACIENTE)
-                            Color.White else Color.Gray,
+                            PureWhite else TextSecondary,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -97,7 +100,7 @@ fun PerfilSelect(
                     Text(
                         text = "Acompanhante",
                         color = if (tipoSelecionado == TipoUsuario.ACOMPANHANTE)
-                            Color.White else Color.Gray,
+                            PureWhite else TextSecondary,
                         fontWeight = FontWeight.Bold
                     )
                 }

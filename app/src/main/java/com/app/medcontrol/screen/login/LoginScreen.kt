@@ -55,10 +55,15 @@ import com.app.medcontrol.components.GlassCard
 import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.components.PerfilSelect
 import com.app.medcontrol.model.TipoUsuario
+import com.app.medcontrol.ui.theme.CompanionPrimary
+import com.app.medcontrol.ui.theme.ErrorRed
 import com.app.medcontrol.ui.theme.LavenderLight
 import com.app.medcontrol.ui.theme.LimeLight
 import com.app.medcontrol.ui.theme.MintBase
+import com.app.medcontrol.ui.theme.PatientPrimary
+import com.app.medcontrol.ui.theme.PureWhite
 import com.app.medcontrol.ui.theme.PurpleBase
+import com.app.medcontrol.ui.theme.TextSecondary
 import com.app.medcontrol.ui.theme.TurquoiseDeep
 import com.app.medcontrol.ui.theme.VioletDeep
 
@@ -119,7 +124,7 @@ fun LoginScreen(
                 mensagemErro = uiState.mensagemErro,
                 onNavigateToCadastroUser = onNavigateToCadastro,
                 isLoading = uiState.isLoading,
-                primaryColor = if (isPaciente) Color(0xFF4CAF50) else Color(0xFF673AB7)
+                primaryColor = if (isPaciente) PatientPrimary else CompanionPrimary
             )
 
         }
@@ -190,7 +195,7 @@ fun UserLogin(tipo: TipoUsuario,
                     else
                         "Acompanhe a saúde do seu paciente",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
+                    color = TextSecondary,
                     textAlign = TextAlign.Center
                 )
             }
@@ -212,7 +217,7 @@ fun UserLogin(tipo: TipoUsuario,
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                     shape = RoundedCornerShape(12.dp),
                     supportingText = {
-                        if (loginError) Text(text = mensagemErro, color = Color.Red)
+                        if (loginError) Text(text = mensagemErro, color = ErrorRed)
                     }
                 )
 
@@ -254,19 +259,19 @@ fun UserLogin(tipo: TipoUsuario,
                 contentAlignment = Alignment.Center
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = PureWhite, modifier = Modifier.size(24.dp))
                 } else {
                     Text(
                         text = if (tipo == TipoUsuario.PACIENTE) "ENTRAR COMO PACIENTE" else "ENTRAR COMO ACOMPANHANTE",
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = PureWhite
                     )
                 }
             }
         }
 
         TextButton(onClick = { onNavigateToCadastroUser() }) {
-            Text("Não possui cadastro? Crie sua conta aqui", color = Color.Gray)
+            Text("Não possui cadastro? Crie sua conta aqui", color = TextSecondary)
         }
     }
 }

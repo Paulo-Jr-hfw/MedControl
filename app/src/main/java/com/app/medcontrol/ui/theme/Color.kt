@@ -22,6 +22,10 @@ val PurpleBase = Color(0xFFE1BEE7)
 val LavenderLight = Color(0xFFF3E5F5)
 val VioletDeep = Color(0xFF9C27B0)
 
+val PatientPrimary = Color(0xFF4CAF50)
+val CompanionPrimary = Color(0xFF673AB7)
+val ErrorRed = Color(0xFFF44336)
+
 //Brushes
 val Color.signalBorderBrush: Brush
     get() = Brush.verticalGradient(
