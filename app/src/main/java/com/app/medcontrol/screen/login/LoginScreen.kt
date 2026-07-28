@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SupervisorAccount
@@ -101,7 +103,10 @@ fun LoginScreen(
                         focusManager.clearFocus()
                     })
                 }
-                .padding(16.dp)) {
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())) {
+            Spacer(modifier = Modifier.height(24.dp))
+
             HeaderIncial()
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -133,13 +138,24 @@ fun LoginScreen(
 
 @Composable
 fun HeaderIncial(modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = null,
+            painter = painterResource(id = R.drawable.logo_app),
+            contentDescription = "logo app",
+            modifier = Modifier.size(80.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
-        Text(text = "MEDCONTROL")
-        Text(text = "Controle de medicamentos inteligente")
+        Text(
+            text = "MEDCONTROL",
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "Controle de medicamentos inteligente",
+            color = TextSecondary)
 
     }
 }

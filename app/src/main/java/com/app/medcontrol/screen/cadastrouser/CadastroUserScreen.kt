@@ -41,7 +41,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.medcontrol.R
+import com.app.medcontrol.components.GlassCard
+import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.components.PerfilSelect
+import com.app.medcontrol.model.TipoUsuario
+import com.app.medcontrol.ui.theme.CompanionPrimary
+import com.app.medcontrol.ui.theme.LavenderLight
+import com.app.medcontrol.ui.theme.LimeLight
+import com.app.medcontrol.ui.theme.MintBase
+import com.app.medcontrol.ui.theme.PatientPrimary
+import com.app.medcontrol.ui.theme.PureWhite
+import com.app.medcontrol.ui.theme.PurpleBase
+import com.app.medcontrol.ui.theme.TextSecondary
+import com.app.medcontrol.ui.theme.TurquoiseDeep
+import com.app.medcontrol.ui.theme.VioletDeep
 
 @Composable
 fun CadastroUserScreen(
@@ -60,59 +73,78 @@ fun CadastroUserScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize().imePadding(),
-        bottomBar = {
-            Button(
-                onClick = { viewModel.onSalvarUsuario() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                enabled = !uiState.isLoading
-            ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                } else {
-                    Text("CRIAR CONTA", fontWeight = FontWeight.Bold)
+    val isPaciente = uiState.tipoSelecionado == TipoUsuario.PACIENTE
+
+    MeshBackground(
+        baseColor = if (isPaciente) MintBase else PurpleBase,
+        topSpotColor = if (isPaciente) LimeLight else LavenderLight,
+        bottomSpotColor = if (isPaciente) TurquoiseDeep else VioletDeep
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize().imePadding(),
+            containerColor = Color.Transparent,
+            bottomBar = {
+                val buttonColor = if (isPaciente) PatientPrimary else CompanionPrimary
+                Button(
+                    onClick = { viewModel.onSalvarUsuario() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = !uiState.isLoading,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = buttonColor
+                    )
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(color = PureWhite, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("CRIAR CONTA", fontWeight = FontWeight.Bold, color = PureWhite)
+                    }
                 }
             }
-        }
-    ) { paddingValues ->
-        val focusManager = LocalFocusManager.current
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        focusManager.clearFocus()
-                    })
+        ) { paddingValues ->
+            val focusManager = LocalFocusManager.current
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    }
+                    .padding(paddingValues)
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                HeaderUser()
+
+                PerfilSelect(
+                    tipoSelecionado = uiState.tipoSelecionado,
+                    onTipoSelected = { viewModel.onTipoSelected(it) }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                GlassCard {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        CadastroUserForm(
+                            nomeUser = uiState.nome,
+                            onNomeUserChange = viewModel::onNomeUserChange,
+                            nomeUserErro = uiState.nomeErro != null,
+                            email = uiState.email,
+                            onEmailChange = viewModel::onEmailChange,
+                            emailErro = uiState.emailErro != null,
+                            emailMensagemErro = uiState.emailErro ?: "E-mail inválido",
+                            senha = uiState.senha,
+                            onSenhaChange = viewModel::onSenhaChange,
+                            senhaErro = uiState.senhaErro != null
+                        )
+                    }
                 }
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(scrollState)
-        ) {
-            HeaderUser()
-
-            PerfilSelect(
-                tipoSelecionado = uiState.tipoSelecionado,
-                onTipoSelected = { viewModel.onTipoSelected(it) }
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            CadastroUserForm(
-                nomeUser = uiState.nome,
-                onNomeUserChange = viewModel::onNomeUserChange,
-                nomeUserErro = uiState.nomeErro != null,
-                email = uiState.email,
-                onEmailChange = viewModel::onEmailChange,
-                emailErro = uiState.emailErro != null,
-                emailMensagemErro = uiState.emailErro ?: "E-mail inválido",
-                senha = uiState.senha,
-                onSenhaChange = viewModel::onSenhaChange,
-                senhaErro = uiState.senhaErro != null
-            )
-
+                
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 }
@@ -126,7 +158,7 @@ fun HeaderUser() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.logo_app),
             contentDescription = null,
             modifier = Modifier.size(80.dp),
             tint = MaterialTheme.colorScheme.primary
@@ -139,7 +171,7 @@ fun HeaderUser() {
         Text(
             text = "Crie sua conta para começar",
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = TextSecondary
         )
     }
 }
