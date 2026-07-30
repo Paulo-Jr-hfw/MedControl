@@ -22,23 +22,29 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.app.medcontrol.navigation.Routes
 
 sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: String) {
     object Home : BottomNavItem("Home", Icons.Default.Home, "home_screen")
     object Meds : BottomNavItem("Remédios", Icons.AutoMirrored.Filled.List, "medicamentos")
     object Sinais : BottomNavItem("Sinais", Icons.Default.Favorite, "sinais")
-
     object Historico : BottomNavItem("Histórico", Icons.Default.History, "historico")
 }
 
 @Composable
-fun NavigationMenu(navController: NavController, usuarioId: Int) {
+fun NavigationMenu(
+    navController: NavController,
+    usuarioId: Int,
+    isAcompanhante: Boolean = false
+) {
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Meds,
         BottomNavItem.Sinais,
         BottomNavItem.Historico
     )
+
+    val homeRoute = if (isAcompanhante) Routes.AcompanhanteHome.route else Routes.HomeScreen.route
 
     Surface(
         modifier = Modifier
@@ -48,14 +54,11 @@ fun NavigationMenu(navController: NavController, usuarioId: Int) {
                     topEnd = 32.dp
                 )
             ),
-
         color = Color.White.copy(alpha = 0.25f),
-
         border = BorderStroke(
             1.dp,
             Color.White.copy(alpha = 0.5f)
         ),
-
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
@@ -68,14 +71,16 @@ fun NavigationMenu(navController: NavController, usuarioId: Int) {
             val currentRoute = navBackStackEntry?.destination?.route
 
             items.forEach { item ->
-                val isSelected = currentRoute == item.route
+                val baseRoute = if (item is BottomNavItem.Home) homeRoute else item.route
+
+                val isSelected = currentRoute?.startsWith(baseRoute) == true
 
                 NavigationBarItem(
                     icon = { Icon(item.icon, contentDescription = item.title) },
                     label = { Text(item.title) },
                     selected = isSelected,
                     onClick = {
-                        val routeWithQuery = "${item.route}?usuarioId=$usuarioId"
+                        val routeWithQuery = "$baseRoute?usuarioId=$usuarioId"
 
                         if (currentRoute != routeWithQuery) {
                             navController.navigate(routeWithQuery) {

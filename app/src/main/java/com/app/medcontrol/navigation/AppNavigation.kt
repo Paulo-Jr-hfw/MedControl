@@ -31,6 +31,11 @@ fun AppNavigation() {
                     navController.navigate("${Routes.HomeScreen.route}/$id") {
                         popUpTo(Routes.Login.route) { inclusive = true }
                     }
+                },
+                onNavigateToAcompanhanteHome = { id ->
+                    navController.navigate("${Routes.AcompanhanteHome.route}/$id") {
+                        popUpTo(Routes.Login.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -70,6 +75,20 @@ fun AppNavigation() {
             val idLogado = backStackEntry.arguments?.getInt("usuarioId") ?: 0
 
             MainContainer(
+                usuarioId = idLogado,
+                onNavigateToGlobalRoute = { rotaGlobal ->
+                    navController.navigate(rotaGlobal)
+                }
+            )
+        }
+
+        composable(
+            route = "${Routes.AcompanhanteHome.route}/{usuarioId}",
+            arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val idLogado = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+            
+            AcompanhanteContainer(
                 usuarioId = idLogado,
                 onNavigateToGlobalRoute = { rotaGlobal ->
                     navController.navigate(rotaGlobal)
