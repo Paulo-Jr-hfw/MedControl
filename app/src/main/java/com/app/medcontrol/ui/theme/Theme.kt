@@ -26,16 +26,28 @@ private val LightColorScheme = lightColorScheme(
     onBackground = TextPrimary,
     onSurface = TextPrimary,
     onSurfaceVariant = TextSecondary
+)
 
+private val CompanionColorScheme = lightColorScheme(
+    primary = CompanionPrimary,
+    secondary = LavenderLight,
+    background = PurpleBase,
+    surface = GlassSurface,
+    onPrimary = PureWhite,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary
 )
 
 @Composable
 fun MedControlTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
+    isCompanion: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
+        isCompanion -> CompanionColorScheme
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
