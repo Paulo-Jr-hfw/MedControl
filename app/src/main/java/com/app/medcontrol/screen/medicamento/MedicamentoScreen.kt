@@ -43,6 +43,7 @@ import com.app.medcontrol.components.MedicamentoItem
 @Composable
 fun MedicamentoScreen(
     viewModel: MedicamentoScreenViewModel = hiltViewModel(),
+    isReadOnly: Boolean = false,
     onNavigateToCadastro: () -> Unit,
     onNavigateToDetalhes: (Int) -> Unit
 ) {
@@ -90,12 +91,14 @@ fun MedicamentoScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToCadastro) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Adicionar Novo",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                    if (!isReadOnly) {
+                        IconButton(onClick = onNavigateToCadastro) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Adicionar Novo",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

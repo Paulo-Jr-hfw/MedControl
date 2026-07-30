@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SinaisScreen(
     viewModel: SinaisScreenViewModel = hiltViewModel(),
+    isReadOnly: Boolean = false,
     onNavigateToManual: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -76,6 +77,7 @@ fun SinaisScreen(
 
     SinaisContent(
         state = uiState,
+        isReadOnly = isReadOnly,
         snackbarHostState = snackbarHostState,
         onRegistrarClick = viewModel::abrirBottomSheet,
         onFecharBottomSheet = viewModel::fecharBottomSheet,
@@ -99,6 +101,7 @@ fun SinaisScreen(
 @Composable
 fun SinaisContent(
     state: SinaisUiState,
+    isReadOnly: Boolean,
     snackbarHostState: SnackbarHostState,
     onRegistrarClick: () -> Unit,
     onFecharBottomSheet: () -> Unit,
@@ -123,7 +126,7 @@ fun SinaisContent(
 
     Scaffold(
         containerColor = Color.Transparent,
-        topBar = { SinaisTopBar(onRegistrarClick = onRegistrarClick) },
+        topBar = { SinaisTopBar(isReadOnly = isReadOnly, onRegistrarClick = onRegistrarClick) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         if (state.listaSinais.isEmpty()) {
@@ -155,7 +158,7 @@ fun SinaisContent(
                 items(state.listaSinais) { sinal ->
                     SinaisItem(
                         sinal = sinal,
-                        onExcluirClick = { onExcluirSinal(sinal.sinaisId) }
+                        onExcluirClick = { if (!isReadOnly) onExcluirSinal(sinal.sinaisId) }
                     )
                 }
             }
@@ -178,14 +181,14 @@ fun SinaisContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SinaisTopBar(onRegistrarClick: () -> Unit) {
+fun SinaisTopBar(isReadOnly: Boolean, onRegistrarClick: () -> Unit) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Timeline,
                     contentDescription = null,
-                    tint = Color(0xFFF57C00)
+                    tint = if (isReadOnly) MaterialTheme.colorScheme.primary else Color(0xFFF57C00)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = "Sinais", fontWeight = FontWeight.Bold)
@@ -196,13 +199,15 @@ fun SinaisTopBar(onRegistrarClick: () -> Unit) {
             scrolledContainerColor = Color.Transparent
         ),
         actions = {
-            Button(
-                onClick =  onRegistrarClick,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF57C00)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Text( "registrar")
+            if (!isReadOnly) {
+                Button(
+                    onClick =  onRegistrarClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF57C00)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Text( "registrar")
+                }
             }
         }
     )
