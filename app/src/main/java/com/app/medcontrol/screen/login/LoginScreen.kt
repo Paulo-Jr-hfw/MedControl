@@ -73,7 +73,8 @@ import com.app.medcontrol.ui.theme.VioletDeep
 fun LoginScreen(
     viewModel: LoginScreenViewModel = hiltViewModel(),
     onNavigateToCadastro: () -> Unit,
-    onNavigateHome: (Int) -> Unit
+    onNavigateHome: (Int) -> Unit,
+    onNavigateToAcompanhanteHome: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var tipoSelecionado by remember { mutableStateOf(TipoUsuario.PACIENTE) }
@@ -82,8 +83,13 @@ fun LoginScreen(
     LaunchedEffect(uiState.sucesso){
         if (uiState.sucesso) {
             val idUsuario = uiState.usuarioLogado?.usuarioId ?: 0
+            val tipo = uiState.usuarioLogado?.tipo ?: TipoUsuario.PACIENTE
 
-            onNavigateHome(idUsuario)
+            if (tipo == TipoUsuario.PACIENTE) {
+                onNavigateHome(idUsuario)
+            } else {
+                onNavigateToAcompanhanteHome(idUsuario)
+            }
             viewModel.resetSucessoLogin()
         }
     }
