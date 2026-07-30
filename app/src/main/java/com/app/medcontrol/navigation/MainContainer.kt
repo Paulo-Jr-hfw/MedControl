@@ -37,7 +37,8 @@ fun MainContainer(
             bottomBar = {
                 NavigationMenu(
                     navController = internalNavController,
-                    usuarioId = usuarioId
+                    usuarioId = usuarioId,
+                    isAcompanhante = false
                 )
             }
         ) { paddingValues ->
