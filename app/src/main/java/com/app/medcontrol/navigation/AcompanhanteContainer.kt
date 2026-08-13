@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,6 +19,7 @@ import androidx.navigation.navArgument
 import com.app.medcontrol.components.MeshBackground
 import com.app.medcontrol.components.NavigationMenu
 import com.app.medcontrol.screen.acompanhante.AcompanhanteHomeScreen
+import com.app.medcontrol.screen.acompanhante.AcompanhanteHomeScreenViewModel
 import com.app.medcontrol.screen.historico.LogGeralScreen
 import com.app.medcontrol.screen.medicamento.MedicamentoScreen
 import com.app.medcontrol.screen.sinais.SinaisScreen
@@ -31,7 +35,10 @@ fun AcompanhanteContainer(
     onNavigateToGlobalRoute: (String) -> Unit
 ) {
     val internalNavController = rememberNavController()
-    val queryArg = "?usuarioId={usuarioId}"
+    val viewModel: AcompanhanteHomeScreenViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    
+    val pacienteId = if (uiState.estaVinculado) uiState.pacienteId else 0
 
     MedControlTheme(isCompanion = true) {
         MeshBackground(
@@ -39,74 +46,92 @@ fun AcompanhanteContainer(
             topSpotColor = LavenderLight,
             bottomSpotColor = VioletDeep
         ) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            bottomBar = {
-                NavigationMenu(
+            Scaffold(
+                containerColor = Color.Transparent,
+                bottomBar = {
+                    if (uiState.estaVinculado) {
+                        NavigationMenu(
+                            navController = internalNavController,
+                            pacienteId = pacienteId,
+                            isAcompanhante = true
+                        )
+                    }
+                }
+            ) { paddingValues ->
+
+                NavHost(
                     navController = internalNavController,
-                    usuarioId = usuarioId,
-                    isAcompanhante = true
-                )
-            }
-        ) { paddingValues ->
-
-            NavHost(
-                navController = internalNavController,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = paddingValues.calculateBottomPadding()),
-                startDestination = "${Routes.AcompanhanteHome.route}$queryArg"
-            ) {
-
-                composable(
-                    route = "${Routes.AcompanhanteHome.route}$queryArg",
-                    arguments = listOf(
-                        navArgument("usuarioId") {
-                            type = NavType.IntType
-                            defaultValue = usuarioId
-                        }
-                    )
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = paddingValues.calculateBottomPadding()),
+                    startDestination = "${Routes.AcompanhanteHome.route}${Routes.Login.pacienteIdArg}"
                 ) {
-                    AcompanhanteHomeScreen(
-                        onLogout = {
-                            onNavigateToGlobalRoute(Routes.Login.route)
-                        }
-                    )
-                }
 
-                composable(
-                    route = "${Routes.Medicamentos.route}$queryArg",
-                    arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
-                ) {
-                    MedicamentoScreen(
-                        isReadOnly = true,
-                        onNavigateToCadastro = { /* Desabilitado */ },
-                        onNavigateToDetalhes = { idMed ->
-                            onNavigateToGlobalRoute("${Routes.Detalhes.route}/$idMed/$usuarioId")
-                        }
-                    )
-                }
+                    composable(
+                        route = "${Routes.AcompanhanteHome.route}${Routes.Login.pacienteIdArg}",
+                        arguments = listOf(
+                            navArgument("pacienteId") {
+                                type = NavType.IntType
+                                defaultValue = 0 
+                            }
+                        )
+                    ) {
+                        AcompanhanteHomeScreen(
+                            viewModel = viewModel,
+                            onLogout = {
+                                onNavigateToGlobalRoute(Routes.Login.route)
+                            }
+                        )
+                    }
 
-                composable(
-                    route = "${Routes.Sinais.route}$queryArg",
-                    arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
-                ) {
-                    SinaisScreen(
-                        isReadOnly = true,
-                        onNavigateToManual = { /* Desabilitado */ }
-                    )
-                }
+                    composable(
+                        route = "${Routes.Medicamentos.route}${Routes.Login.pacienteIdArg}",
+                        arguments = listOf(
+                            navArgument("pacienteId") {
+                                type = NavType.IntType
+                                defaultValue = pacienteId
+                            }
+                        )
+                    ) {
+                        MedicamentoScreen(
+                            isReadOnly = true,
+                            onNavigateToCadastro = { /* Desabilitado */ },
+                            onNavigateToDetalhes = { idMed ->
+                                onNavigateToGlobalRoute("${Routes.Detalhes.route}/$idMed/$pacienteId")
+                            }
+                        )
+                    }
 
-                composable(
-                    route = "${Routes.Historico.route}$queryArg",
-                    arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
-                ) {
-                    LogGeralScreen(
-                        onVoltar = { internalNavController.popBackStack() }
-                    )
+                    composable(
+                        route = "${Routes.Sinais.route}${Routes.Login.pacienteIdArg}",
+                        arguments = listOf(
+                            navArgument("pacienteId") {
+                                type = NavType.IntType
+                                defaultValue = pacienteId
+                            }
+                        )
+                    ) {
+                        SinaisScreen(
+                            isReadOnly = true,
+                            onNavigateToManual = { /* Desabilitado */ }
+                        )
+                    }
+
+                    composable(
+                        route = "${Routes.Historico.route}${Routes.Login.pacienteIdArg}",
+                        arguments = listOf(
+                            navArgument("pacienteId") {
+                                type = NavType.IntType
+                                defaultValue = pacienteId
+                            }
+                        )
+                    ) {
+                        LogGeralScreen(
+                            onVoltar = { internalNavController.popBackStack() }
+                        )
+                    }
                 }
             }
         }
     }
-}
 }
