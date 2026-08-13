@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose.v120)
     ksp(libs.hilt.compiler)
