@@ -6,8 +6,12 @@ import com.app.medcontrol.repository.MedicamentoRepository
 import com.app.medcontrol.repository.MedicamentoRepositoryImpl
 import com.app.medcontrol.repository.RegistroRepository
 import com.app.medcontrol.repository.RegistroRepositoryImpl
+import com.app.medcontrol.repository.SinaisRepository
+import com.app.medcontrol.repository.SinaisRepositoryImpl
 import com.app.medcontrol.repository.UsuarioRepository
 import com.app.medcontrol.repository.UsuarioRepositoryImpl
+import com.app.medcontrol.repository.VinculoRepository
+import com.app.medcontrol.repository.VinculoRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -38,7 +42,19 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindSinaisRepository(
+        sinaisRepositoryImpl: SinaisRepositoryImpl
+    ): SinaisRepository
+
+    @Binds
+    @Singleton
     abstract fun bindUsuarioRepository(
         usuarioRepositoryImpl: UsuarioRepositoryImpl
     ): UsuarioRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindVinculoRepository(
+        vinculoRepositoryImpl: VinculoRepositoryImpl
+    ): VinculoRepository
 }

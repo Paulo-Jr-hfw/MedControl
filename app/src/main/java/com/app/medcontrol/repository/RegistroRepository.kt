@@ -8,9 +8,9 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 interface RegistroRepository {
-    fun getDosesPendentesFlow(data: LocalDate): Flow<List<RegistroComMedicamento>>
-    fun getTotalDosesDoDia(data: LocalDate): Flow<Int>
-    fun getDosesTomadasDoDia(data: LocalDate): Flow<Int>
+    fun getDosesPendentesFlow(pacienteId: Int, data: LocalDate): Flow<List<RegistroComMedicamento>>
+    fun getTotalDosesDoDia(pacienteId: Int, data: LocalDate): Flow<Int>
+    fun getDosesTomadasDoDia(pacienteId: Int, data: LocalDate): Flow<Int>
     suspend fun verificarSeExisteDoseNoDia(medicamentoId: Int, data: LocalDate): Int
     suspend fun inserirRegistros(registros: List<RegistroConsumoEntity>): List<Long>
     suspend fun getRegistroById(registroId: Int): RegistroConsumoEntity?

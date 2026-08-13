@@ -15,6 +15,9 @@ interface SinaisDao {
     @Query("SELECT * FROM sinais WHERE pacienteId = :pacienteId ORDER BY dataRegistro DESC")
     fun getAllSinais(pacienteId: Int): Flow<List<SinaisEntity>>
 
+    @Query("SELECT * FROM sinais WHERE sinaisId = :sinaisId")
+    suspend fun getSinalPorId(sinaisId: Int): SinaisEntity?
+
     @Query("DELETE FROM sinais WHERE sinaisId = :sinaisId")
     suspend fun deleteSinalPorId(sinaisId: Int)
 

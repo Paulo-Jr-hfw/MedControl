@@ -23,30 +23,42 @@ interface RegistroConsumoDao {
 
     @Transaction // Necessário quando usamos @Relation
     @Query("""
-    SELECT * FROM registros_consumo 
-    WHERE dataAgendada = :data 
-    AND status IN ('PENDENTE', 'ATRASADO') 
-    ORDER BY horarioAgendado ASC
+    SELECT r.* FROM registros_consumo r
+    INNER JOIN medicamentos m ON r.medicamentoId = m.id
+    WHERE m.usuarioId = :pacienteId 
+    AND r.dataAgendada = :data 
+    AND r.status IN ('PENDENTE', 'ATRASADO') 
+    ORDER BY r.horarioAgendado ASC
 """)
-    fun getDosesPendentesFlow(data: LocalDate): Flow<List<RegistroComMedicamento>>
+    fun getDosesPendentesFlow(pacienteId: Int, data: LocalDate): Flow<List<RegistroComMedicamento>>
 
     // Para o cálculo do progresso
-    @Query("SELECT COUNT(*) FROM registros_consumo WHERE dataAgendada = :data")
-    fun getTotalDosesDoDia(data: LocalDate): Flow<Int>
+    @Query("""
+        SELECT COUNT(*) FROM registros_consumo r
+        INNER JOIN medicamentos m ON r.medicamentoId = m.id
+        WHERE m.usuarioId = :pacienteId AND r.dataAgendada = :data
+    """)
+    fun getTotalDosesDoDia(pacienteId: Int, data: LocalDate): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM registros_consumo WHERE dataAgendada = :data AND status = 'TOMADO'")
-    fun getDosesTomadasDoDia(data: LocalDate): Flow<Int>
+    @Query("""
+        SELECT COUNT(*) FROM registros_consumo r
+        INNER JOIN medicamentos m ON r.medicamentoId = m.id
+        WHERE m.usuarioId = :pacienteId AND r.dataAgendada = :data AND r.status = 'TOMADO'
+    """)
+    fun getDosesTomadasDoDia(pacienteId: Int, data: LocalDate): Flow<Int>
 
     @Query("SELECT COUNT(*) FROM registros_consumo WHERE medicamentoId = :medicamentoId AND dataAgendada = :data")
     suspend fun verificarSeExisteDoseNoDia(medicamentoId: Int, data: LocalDate): Int
 
     @Transaction
     @Query("""
-    SELECT * FROM registros_consumo 
-    WHERE dataAgendada = :data 
-    AND status IN ('PENDENTE', 'ATRASADO')
+    SELECT r.* FROM registros_consumo r
+    INNER JOIN medicamentos m ON r.medicamentoId = m.id
+    WHERE m.usuarioId = :pacienteId 
+    AND r.dataAgendada = :data 
+    AND r.status IN ('PENDENTE', 'ATRASADO')
 """)
-    suspend fun getDosesPendentesList(data: LocalDate): List<RegistroComMedicamento>
+    suspend fun getDosesPendentesList(pacienteId: Int, data: LocalDate): List<RegistroComMedicamento>
 
     @Query("""
     UPDATE registros_consumo 
