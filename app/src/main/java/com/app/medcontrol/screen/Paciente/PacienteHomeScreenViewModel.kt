@@ -11,9 +11,12 @@ import com.app.medcontrol.data.entity.TipoEvento
 import com.app.medcontrol.repository.HistoricoRepository
 import com.app.medcontrol.repository.LogRepository
 import com.app.medcontrol.repository.MedicamentoRepository
+import com.app.medcontrol.data.entity.UsuarioEntity
 import com.app.medcontrol.repository.RegistroRepository
 import com.app.medcontrol.repository.UsuarioRepository
+import com.app.medcontrol.repository.VinculoRepository
 import com.app.medcontrol.service.AlarmScheduler
+import com.app.medcontrol.service.SessionManager
 import com.app.medcontrol.util.DateTimeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -34,6 +37,8 @@ class PacienteHomeScreenViewModel @Inject constructor(
     private val medicamentoRepository: MedicamentoRepository,
     private val registroRepository: RegistroRepository,
     private val historicoRepository: HistoricoRepository,
+    private val vinculoRepository: VinculoRepository,
+    private val sessionManager: SessionManager,
     private val alarmScheduler: AlarmScheduler,
     private val logRepository: LogRepository,
     savedStateHandle: SavedStateHandle
@@ -52,10 +57,11 @@ class PacienteHomeScreenViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<HomeUiState> = combine(
-        registroRepository.getDosesPendentesFlow(hoje),
-        registroRepository.getTotalDosesDoDia(hoje),
-        registroRepository.getDosesTomadasDoDia(hoje)
-    ) { registrosComMed, total, tomadas ->
+        registroRepository.getDosesPendentesFlow(usuarioId, hoje),
+        registroRepository.getTotalDosesDoDia(usuarioId, hoje),
+        registroRepository.getDosesTomadasDoDia(usuarioId, hoje),
+        vinculoRepository.getAcompanhanteVinculado(usuarioId)
+    ) { registrosComMed, total, tomadas, acompanhante ->
         val usuario = usuarioRepository.getUsuarioById(usuarioId)
 
         val listaDoses = registrosComMed.map { item ->
@@ -72,10 +78,12 @@ class PacienteHomeScreenViewModel @Inject constructor(
         }
 
         HomeUiState(
+            usuarioId = usuarioId,
             nomeUser = usuario?.nome ?: "Usuário",
             dosesPendentes = listaDoses,
             totalDosesDia = total,
             dosesTomadas = tomadas,
+            acompanhanteVinculado = acompanhante,
             isLoading = false
         )
     }.stateIn(
@@ -83,6 +91,12 @@ class PacienteHomeScreenViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState(isLoading = true)
     )
+
+    fun desvincularAcompanhante(acompanhanteId: Int) {
+        viewModelScope.launch {
+            vinculoRepository.desvincular(usuarioId, acompanhanteId)
+        }
+    }
 
     init {
         observarMedicamentos()
@@ -182,6 +196,7 @@ class PacienteHomeScreenViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            sessionManager.clearSession()
             _uiEvent.send(HomeUiEvent.Logout)
         }
     }
@@ -216,11 +231,13 @@ class PacienteHomeScreenViewModel @Inject constructor(
 }
 
 data class HomeUiState(
+    val usuarioId: Int = 0,
     val nomeUser: String = "",
     val isLoading: Boolean = false,
     val dosesPendentes: List<DoseAgendada> = emptyList(),
     val totalDosesDia: Int = 0,
-    val dosesTomadas: Int = 0
+    val dosesTomadas: Int = 0,
+    val acompanhanteVinculado: UsuarioEntity? = null
 )
 
 data class DoseAgendada(
