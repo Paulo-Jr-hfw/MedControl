@@ -34,7 +34,7 @@ sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: 
 @Composable
 fun NavigationMenu(
     navController: NavController,
-    usuarioId: Int,
+    pacienteId: Int, // ID do paciente cujos dados serão visualizados
     isAcompanhante: Boolean = false
 ) {
     val items = listOf(
@@ -44,7 +44,7 @@ fun NavigationMenu(
         BottomNavItem.Historico
     )
 
-    val homeRoute = if (isAcompanhante) Routes.AcompanhanteHome.route else Routes.HomeScreen.route
+    val homeBaseRoute = if (isAcompanhante) Routes.AcompanhanteHome.route else Routes.HomeScreen.route
 
     Surface(
         modifier = Modifier
@@ -71,8 +71,9 @@ fun NavigationMenu(
             val currentRoute = navBackStackEntry?.destination?.route
 
             items.forEach { item ->
-                val baseRoute = if (item is BottomNavItem.Home) homeRoute else item.route
-
+                val baseRoute = if (item is BottomNavItem.Home) homeBaseRoute else item.route
+                
+                // Verifica se a rota atual começa com a baseRoute
                 val isSelected = currentRoute?.startsWith(baseRoute) == true
 
                 NavigationBarItem(
@@ -80,10 +81,11 @@ fun NavigationMenu(
                     label = { Text(item.title) },
                     selected = isSelected,
                     onClick = {
-                        val routeWithQuery = "$baseRoute?usuarioId=$usuarioId"
+                        // SEMPRE passamos pacienteId para as telas internas
+                        val targetRoute = "$baseRoute?pacienteId=$pacienteId"
 
-                        if (currentRoute != routeWithQuery) {
-                            navController.navigate(routeWithQuery) {
+                        if (currentRoute != targetRoute) {
+                            navController.navigate(targetRoute) {
                                 popUpTo(navController.graph.startDestinationId) {
                                     saveState = true
                                 }

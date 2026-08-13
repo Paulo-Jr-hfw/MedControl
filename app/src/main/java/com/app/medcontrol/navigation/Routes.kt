@@ -7,6 +7,10 @@ sealed class Routes(val route: String) {
     object HomeScreen: Routes("home_screen")
     object AcompanhanteHome: Routes("acompanhante_home")
 
+
+    val usuarioIdArg = "?usuarioId={usuarioId}"
+    val pacienteIdArg = "?pacienteId={pacienteId}"
+
     object CadastroMed: Routes("cadastro_med")
     object Medicamentos : Routes("medicamentos")
     object Sinais : Routes("sinais")

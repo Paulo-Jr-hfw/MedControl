@@ -29,7 +29,7 @@ fun MainContainer(
 ) {
 
     val internalNavController = rememberNavController()
-    val queryArg = "?usuarioId={usuarioId}"
+    val queryArg = Routes.Login.usuarioIdArg // Usando a variável centralizada
 
     MeshBackground {
         Scaffold(
@@ -37,7 +37,7 @@ fun MainContainer(
             bottomBar = {
                 NavigationMenu(
                     navController = internalNavController,
-                    usuarioId = usuarioId,
+                    pacienteId = usuarioId, // No MainContainer, o pacienteId é o próprio usuarioId
                     isAcompanhante = false
                 )
             }
@@ -48,19 +48,23 @@ fun MainContainer(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = paddingValues.calculateBottomPadding()),
-                startDestination = "${Routes.HomeScreen.route}$queryArg"
+                startDestination = "${Routes.HomeScreen.route}${Routes.Login.usuarioIdArg}&pacienteId={pacienteId}"
             ) {
 
                 composable(
-                    route = "${Routes.HomeScreen.route}$queryArg",
+                    route = "${Routes.HomeScreen.route}${Routes.Login.usuarioIdArg}&pacienteId={pacienteId}",
                     arguments = listOf(
                         navArgument("usuarioId") {
+                            type = NavType.IntType
+                            defaultValue = usuarioId
+                        },
+                        navArgument("pacienteId") {
                             type = NavType.IntType
                             defaultValue = usuarioId
                         }
                     )
                 ) { backStackEntry ->
-                    val idRecuperado = backStackEntry.arguments?.getInt("usuarioId") ?: usuarioId
+                    val idRecuperado = backStackEntry.arguments?.getInt("pacienteId") ?: usuarioId
 
                     PacienteHomeScreen(
                         onNavigateToCadastroMed = {
@@ -76,8 +80,13 @@ fun MainContainer(
                 }
 
                 composable(
-                    route = "${Routes.Medicamentos.route}$queryArg",
-                    arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+                    route = "${Routes.Medicamentos.route}${Routes.Login.pacienteIdArg}",
+                    arguments = listOf(
+                        navArgument("pacienteId") {
+                            type = NavType.IntType
+                            defaultValue = usuarioId
+                        }
+                    )
                 ) {
                     MedicamentoScreen(
                         onNavigateToCadastro = {
@@ -90,8 +99,13 @@ fun MainContainer(
                 }
 
                 composable(
-                    route = "${Routes.Sinais.route}$queryArg",
-                    arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+                    route = "${Routes.Sinais.route}${Routes.Login.pacienteIdArg}",
+                    arguments = listOf(
+                        navArgument("pacienteId") {
+                            type = NavType.IntType
+                            defaultValue = usuarioId
+                        }
+                    )
                 ) {
                     SinaisScreen(
                         onNavigateToManual = {
@@ -101,8 +115,13 @@ fun MainContainer(
                 }
 
                 composable(
-                    route = "${Routes.Historico.route}$queryArg",
-                    arguments = listOf(navArgument("usuarioId") { type = NavType.IntType })
+                    route = "${Routes.Historico.route}${Routes.Login.pacienteIdArg}",
+                    arguments = listOf(
+                        navArgument("pacienteId") {
+                            type = NavType.IntType
+                            defaultValue = usuarioId
+                        }
+                    )
                 ) {
                     LogGeralScreen(
                         onVoltar = { internalNavController.popBackStack() }
