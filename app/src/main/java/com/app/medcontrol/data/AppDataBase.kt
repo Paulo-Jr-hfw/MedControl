@@ -11,12 +11,14 @@ import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.dao.UsuarioDao
+import com.app.medcontrol.data.dao.VinculoDao
 import com.app.medcontrol.data.entity.HistoricoMedicamentoEntity
 import com.app.medcontrol.data.entity.LogGeralEntity
 import com.app.medcontrol.data.entity.MedicamentoEntity
 import com.app.medcontrol.data.entity.RegistroConsumoEntity
 import com.app.medcontrol.data.entity.SinaisEntity
 import com.app.medcontrol.data.entity.UsuarioEntity
+import com.app.medcontrol.data.entity.VinculoAcompanhanteEntity
 
 @Database(entities = [
     MedicamentoEntity::class,
@@ -24,8 +26,9 @@ import com.app.medcontrol.data.entity.UsuarioEntity
     RegistroConsumoEntity::class,
     HistoricoMedicamentoEntity::class,
     SinaisEntity::class,
-    LogGeralEntity::class],
-    version = 18, exportSchema = false)
+    LogGeralEntity::class,
+    VinculoAcompanhanteEntity::class],
+    version = 21, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun medicamentoDao(): MedicamentoDao
@@ -37,6 +40,8 @@ abstract class AppDataBase: RoomDatabase() {
     abstract fun historicoMedicamentoDao(): HistoricoMedicamentoDao
 
     abstract fun logGeralDao(): LogGeralDao
+
+    abstract fun vinculoDao(): VinculoDao
 
     companion object {
         @Volatile
