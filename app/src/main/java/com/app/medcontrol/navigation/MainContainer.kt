@@ -29,7 +29,6 @@ fun MainContainer(
 ) {
 
     val internalNavController = rememberNavController()
-    val queryArg = Routes.Login.usuarioIdArg // Usando a variável centralizada
 
     MeshBackground {
         Scaffold(
