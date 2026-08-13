@@ -6,6 +6,7 @@ import com.app.medcontrol.data.dao.UsuarioDao
 import com.app.medcontrol.model.TipoUsuario
 import com.app.medcontrol.model.Usuario
 import com.app.medcontrol.model.ui.LoginUiState
+import com.app.medcontrol.service.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
-    private val usuarioDao: UsuarioDao
+    private val usuarioDao: UsuarioDao,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState
@@ -49,6 +51,9 @@ class LoginScreenViewModel @Inject constructor(
             val usuario = usuarioDao.login(currentState.email, currentState.senha)
 
             if (usuario != null && usuario.tipo == tipoSelecionado.name) {
+                // Salvar na sessão persistente (DataStore)
+                sessionManager.saveSession(usuario.id, tipoSelecionado)
+
                 val usuarioLogadoParaApp = Usuario(
                     usuarioId = usuario.id,
                     nome = usuario.nome,
