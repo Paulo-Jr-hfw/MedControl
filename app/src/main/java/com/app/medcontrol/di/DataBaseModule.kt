@@ -9,6 +9,7 @@ import com.app.medcontrol.data.dao.MedicamentoDao
 import com.app.medcontrol.data.dao.RegistroConsumoDao
 import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.dao.UsuarioDao
+import com.app.medcontrol.data.dao.VinculoDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -66,5 +67,11 @@ object DataBaseModule {
     @Singleton
     fun provideLogGeralDao(dataBase: AppDataBase) : LogGeralDao {
         return dataBase.logGeralDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideVinculoDao(dataBase: AppDataBase): VinculoDao {
+        return dataBase.vinculoDao()
     }
 }
