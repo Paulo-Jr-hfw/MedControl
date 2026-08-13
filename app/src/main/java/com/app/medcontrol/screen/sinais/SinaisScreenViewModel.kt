@@ -6,12 +6,13 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.medcontrol.data.dao.SinaisDao
 import com.app.medcontrol.data.mapHealthDataToEntity
 import com.app.medcontrol.data.toDomain
 import com.app.medcontrol.data.toUI
+import com.app.medcontrol.domain.usecase.ValidaAcessoPacienteUseCase
 import com.app.medcontrol.model.ui.SinaisUI
 import com.app.medcontrol.repository.LogRepository
+import com.app.medcontrol.repository.SinaisRepository
 import com.app.medcontrol.service.healthconnect.HealthConnectManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -29,19 +30,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SinaisScreenViewModel@Inject constructor(
-    private val sinaisDao: SinaisDao,
+    private val sinaisRepository: SinaisRepository,
     private val logRepository: LogRepository,
+    private val validaAcessoUseCase: ValidaAcessoPacienteUseCase,
     val healthConnectManager: HealthConnectManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val usuarioId: Int = checkNotNull(savedStateHandle["usuarioId"])
+    private val pacienteId: Int = checkNotNull(savedStateHandle["pacienteId"])
     private val _uiEvent = Channel<SinaisUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     private val _loadingRelogio = MutableStateFlow(false)
     private val _mostrarBottomSheet = MutableStateFlow(false)
+    private val _isAuthorized = MutableStateFlow<Boolean?>(null)
 
-    private val listaSinaisUI = sinaisDao.getAllSinais(usuarioId)
+    private val listaSinaisUI = sinaisRepository.getAllSinais(pacienteId)
         .map { listaEntity ->
             listaEntity.map { entity ->
                 entity.toDomain().toUI()
@@ -52,6 +55,17 @@ class SinaisScreenViewModel@Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    init {
+        viewModelScope.launch {
+            if (!validaAcessoUseCase(pacienteId)) {
+                _uiEvent.send(SinaisUiEvent.MostrarSnackbar("Acesso negado."))
+                _isAuthorized.value = false
+            } else {
+                _isAuthorized.value = true
+            }
+        }
+    }
 
     val uiState: StateFlow<SinaisUiState> = combine(
         listaSinaisUI,
@@ -80,7 +94,7 @@ class SinaisScreenViewModel@Inject constructor(
     fun excluirSinal(sinaisId: Int) {
         viewModelScope.launch {
             try {
-                sinaisDao.deleteSinalPorId(sinaisId)
+                sinaisRepository.deleteSinalPorId(sinaisId)
                 _uiEvent.send(SinaisUiEvent.MostrarSnackbar("Sinal excluído com sucesso"))
             } catch (e: Exception) {
                 _uiEvent.send(SinaisUiEvent.MostrarSnackbar("Erro ao excluir registro"))
@@ -114,17 +128,17 @@ class SinaisScreenViewModel@Inject constructor(
                         _uiEvent.send(SinaisUiEvent.MostrarSnackbar("Nenhuma medição recente encontrada."))
                     } else {
                         val novoSinal = mapHealthDataToEntity(
-                            usuarioId = usuarioId,
+                            usuarioId = pacienteId,
                             batimento = batimento,
                             pressao = pressao,
                             oxigenacao = oxigenacao,
                             temperatura = temperatura
                         )
 
-                        sinaisDao.insertSinais(novoSinal)
+                        sinaisRepository.insertSinais(novoSinal)
 
                         logRepository.registrarLogSinais(
-                            usuarioId = usuarioId,
+                            usuarioId = pacienteId,
                             fc = novoSinal.fc,
                             paSistolica = novoSinal.paSistolica,
                             paDiastolica = novoSinal.paDiastolica,

@@ -52,7 +52,8 @@ fun obterStatusDose(statusNoBanco: StatusConsumo): CartaoStatus {
 @Composable
 fun DoseItemHome(
     dose: DoseAgendada,
-    onCheckClick: () -> Unit
+    isReadOnly: Boolean = false,
+    onCheckClick: () -> Unit = {}
 ) {
     val status = obterStatusDose(dose.status)
 
@@ -134,16 +135,18 @@ fun DoseItemHome(
                     }
                 }
 
-                IconButton(
-                    onClick = onCheckClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Confirmar dose",
-                        tint = if (status != CartaoStatus.NORMAL) statusColor else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                        modifier = Modifier.size(32.dp)
-                    )
+                if (!isReadOnly) {
+                    IconButton(
+                        onClick = onCheckClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Confirmar dose",
+                            tint = if (status != CartaoStatus.NORMAL) statusColor else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             }
         }

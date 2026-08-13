@@ -45,7 +45,8 @@ import com.app.medcontrol.ui.theme.signalGlassBackground
 @Composable
 fun SinaisItem(
     sinal: SinaisUI,
-    onExcluirClick: () -> Unit,
+    isReadOnly: Boolean = false,
+    onExcluirClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     GlassCard (
@@ -66,16 +67,18 @@ fun SinaisItem(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                IconButton(
-                    onClick = onExcluirClick,
-                    modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Excluir",
-                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                        modifier = Modifier.size(20.dp)
-                    )
+                if (!isReadOnly) {
+                    IconButton(
+                        onClick = onExcluirClick,
+                        modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Excluir",
+                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
@@ -113,7 +116,7 @@ fun SinaisItem(
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.EditNote, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(Modifier.width(4.dp))
                     Text(text = it, fontSize = 13.sp, fontStyle = FontStyle.Italic, color = Color.DarkGray)
                 }
             }

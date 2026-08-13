@@ -158,6 +158,7 @@ fun SinaisContent(
                 items(state.listaSinais) { sinal ->
                     SinaisItem(
                         sinal = sinal,
+                        isReadOnly = isReadOnly,
                         onExcluirClick = { if (!isReadOnly) onExcluirSinal(sinal.sinaisId) }
                     )
                 }

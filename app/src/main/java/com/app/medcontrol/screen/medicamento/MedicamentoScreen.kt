@@ -140,6 +140,7 @@ fun MedicamentoScreen(
                 ) { medUi ->
                     MedicamentoItem(
                         medicamento = medUi,
+                        isReadOnly = isReadOnly,
                         onDeleteClick = {
                             medicamentoIdParaExcluir = medUi.id
                             medicamentoNomeParaExcluir = medUi.nome
