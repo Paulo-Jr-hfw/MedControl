@@ -54,9 +54,9 @@ fun SinaisItem(
             .fillMaxWidth()
             .padding(vertical = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier.padding(16.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -82,11 +82,11 @@ fun SinaisItem(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier.height(8.dp))
 
 
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
                 maxItemsInEachRow = 3
             ) {
@@ -113,7 +113,7 @@ fun SinaisItem(
 
 
             sinal.observacoes?.let {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.EditNote, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(4.dp))
