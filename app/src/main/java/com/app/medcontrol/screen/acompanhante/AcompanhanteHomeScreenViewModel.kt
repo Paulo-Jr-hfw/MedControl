@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -52,46 +54,66 @@ class AcompanhanteHomeScreenViewModel @Inject constructor(
     private val _codigoInput = MutableStateFlow("")
     val codigoInput = _codigoInput.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val uiState: StateFlow<AcompanhanteHomeUiState> = vinculoRepository.getVinculoPorAcompanhante(usuarioId)
-        .flatMapLatest { vinculo ->
-            if (vinculo == null) {
-                flowOf(AcompanhanteHomeUiState(estaVinculado = false, isLoading = false))
-            } else {
-                val pId = vinculo.pacienteId
-                
-                combine(
-                    usuarioRepository.getUsuarioById(pId).let { flowOf(it) },
-                    registroRepository.getDosesPendentesFlow(pId, hoje),
-                    registroRepository.getTotalDosesDoDia(pId, hoje),
-                    registroRepository.getDosesTomadasDoDia(pId, hoje)
-                ) { paciente, doses, total, tomadas ->
-                    AcompanhanteHomeUiState(
-                        estaVinculado = true,
-                        pacienteId = pId,
-                        nomePaciente = paciente?.nome ?: "Paciente",
-                        dosesPaciente = doses.map { item ->
-                            DoseAgendada(
-                                registroId = item.registro.id,
-                                nomeMedicamento = item.medicamento.nome,
-                                dosagem = item.medicamento.dosagem,
-                                horarioAgendado = item.registro.horarioAgendado,
-                                status = item.registro.status,
-                                imagemUri = item.medicamento.imagemUri,
-                                medicamentoId = item.medicamento.id,
-                                usuarioId = item.medicamento.usuarioId
-                            )
-                        },
-                        totalDosesDia = total,
-                        dosesTomadas = tomadas,
-                        isLoading = false
-                    )
+    val uiState: StateFlow<AcompanhanteHomeUiState> =
+        vinculoRepository.getVinculoPorAcompanhante(usuarioId)
+            .flatMapLatest { vinculo ->
+
+                val companionFlow =
+                    flow { emit(usuarioRepository.getUsuarioById(usuarioId)) }
+
+                if (vinculo == null) {
+
+                    companionFlow.map { companion ->
+                        AcompanhanteHomeUiState(
+                            estaVinculado = false,
+                            nomeAcompanhante = companion?.nome ?: "Acompanhante",
+                            isLoading = false
+                        )
+                    }
+
+                } else {
+
+                    val pId = vinculo.pacienteId
+
+                    combine(
+                        companionFlow,
+                        flow { emit(usuarioRepository.getUsuarioById(pId)) },
+                        registroRepository.getDosesPendentesFlow(pId, hoje),
+                        registroRepository.getTotalDosesDoDia(pId, hoje),
+                        registroRepository.getDosesTomadasDoDia(pId, hoje)
+                    ) { companion, paciente, doses, total, tomadas ->
+
+                        AcompanhanteHomeUiState(
+                            estaVinculado = true,
+                            pacienteId = pId,
+                            nomePaciente = paciente?.nome ?: "Paciente",
+                            nomeAcompanhante = companion?.nome ?: "Acompanhante",
+
+                            dosesPaciente = doses.map { item ->
+                                DoseAgendada(
+                                    registroId = item.registro.id,
+                                    nomeMedicamento = item.medicamento.nome,
+                                    dosagem = item.medicamento.dosagem,
+                                    horarioAgendado = item.registro.horarioAgendado,
+                                    status = item.registro.status,
+                                    imagemUri = item.medicamento.imagemUri,
+                                    medicamentoId = item.medicamento.id,
+                                    usuarioId = item.medicamento.usuarioId
+                                )
+                            },
+
+                            totalDosesDia = total,
+                            dosesTomadas = tomadas,
+                            isLoading = false
+                        )
+                    }
                 }
             }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = AcompanhanteHomeUiState(isLoading = true)
-        )
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = AcompanhanteHomeUiState(isLoading = true)
+            )
 
     fun onCodigoChange(novo: String) {
         _codigoInput.value = novo
@@ -133,6 +155,7 @@ data class AcompanhanteHomeUiState(
     val estaVinculado: Boolean = false,
     val pacienteId: Int = 0,
     val nomePaciente: String = "",
+    val nomeAcompanhante: String = "",
     val isLoading: Boolean = false,
     val dosesPaciente: List<DoseAgendada> = emptyList(),
     val totalDosesDia: Int = 0,

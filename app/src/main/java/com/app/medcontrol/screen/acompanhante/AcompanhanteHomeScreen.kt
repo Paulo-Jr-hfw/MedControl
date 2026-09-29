@@ -92,7 +92,7 @@ fun AcompanhanteHomeScreen(
             item {
                 AcompanhanteHeader(
                     onLogoutClick = viewModel::logout,
-                    nomeUsuario = uiState.nomePaciente,
+                    nomeUsuario = uiState.nomeAcompanhante,
                     onDesvincular = viewModel::desvincular
                 )
             }

@@ -28,7 +28,7 @@ import com.app.medcontrol.data.entity.VinculoAcompanhanteEntity
     SinaisEntity::class,
     LogGeralEntity::class,
     VinculoAcompanhanteEntity::class],
-    version = 21, exportSchema = false)
+    version = 23, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun medicamentoDao(): MedicamentoDao
