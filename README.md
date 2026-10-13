@@ -73,7 +73,21 @@ O projeto adota os padrões recomendados pelo **Modern Android Development (MAD)
 ---
 
 ## 📸 Screenshots
-*Imagens da interface conforme o desenvolvimento avançar.*
+|                Login                 |           Home do Paciente           |
+|:------------------------------------:|:------------------------------------:|
+| ![Login](screenshots/TelaLogin.png) | ![Home](screenshots/TelaPerfil.png) |
+
+|                    Medicamentos                    |               Sinais Vitais               |
+|:--------------------------------------------------:|:-----------------------------------------:|
+| ![Medicamentos](screenshots/TelaMedicamentos.png) | ![Histórico](screenshots/TelaSinais.png) |
+
+|                Historico                 |             Vinculo acompanhante              |
+|:----------------------------------------:|:---------------------------------------------:|
+| ![Login](screenshots/TelaHistorico.png) | ![Home](screenshots/VinculoAcompanhante.png) |
+
+|                 Home Acompanhante                 |
+|:-------------------------------------------------:|
+| ![Medicamentos](screenshots/TelaAcompanhante.png) | 
 
 ---
 
