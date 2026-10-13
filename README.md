@@ -2,10 +2,10 @@
 
 > **MedControl** é um aplicativo Android nativo desenvolvido para transformar a rotina de adesão a tratamentos médicos e monitoramento de saúde, conectando pacientes e cuidadores através de uma experiência intuitiva, reativa e altamente confiável.
 
-[![Android](https://img.shields.io/badge/PLATFORM-ANDROID-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/LANGUAGE-KOTLIN-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![Jetpack Compose](https://img.shields.io/badge/UI-JETPACK%20COMPOSE-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![Hilt](https://img.shields.io/badge/DEPENDENCY%20INJECTION-HILT-546E7A?style=for-the-badge&logo=dagger&logoColor=white)](https://dagger.dev/hilt/)
+[![Android](https://img.shields.io/badge/PLATFORM-ANDROID-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)<br>
+[![Kotlin](https://img.shields.io/badge/LANGUAGE-KOTLIN-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)<br>
+[![Jetpack Compose](https://img.shields.io/badge/UI-JETPACK%20COMPOSE-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)<br>
+[![Hilt](https://img.shields.io/badge/DEPENDENCY%20INJECTION-HILT-546E7A?style=for-the-badge&logo=dagger&logoColor=white)](https://dagger.dev/hilt/)<br>
 [![Status](https://img.shields.io/badge/STATUS-COMPLETO-2E7D32?style=for-the-badge&logo=checkmarx&logoColor=white)](#)
 
 ---
